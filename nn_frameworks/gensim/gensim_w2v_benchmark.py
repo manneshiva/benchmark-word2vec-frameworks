@@ -1,11 +1,12 @@
 import time
 import gensim
 import memory_profiler
-
+import logging
+logging.basicConfig(format='%(asctime)s : %(levelname)s : %(message)s', level=logging.INFO)
 
 # In[7]:
 
-text8_file = '/home/cva/RaRe Incubator/benchmark_ml_hardware/benmark_nn_frameworks/data/text8'
+text8_file = '../../data/text8'
 
 
 # In[8]:

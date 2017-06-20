@@ -5,8 +5,8 @@
 
 from train import Train
 
-from hyperparams import Hyperparams as hp
-
 if __name__ == '__main__':
     train = Train(epochs=10)
     train.train_gensim()
+    train.train_originalc()
+    train.train_tensorflow()
