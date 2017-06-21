@@ -1,4 +1,0 @@
-gensim
-memory_profiler
-psutil
-
