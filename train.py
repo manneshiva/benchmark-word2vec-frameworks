@@ -4,14 +4,15 @@
 # Author: Shiva Manne <manneshiva@gmail.com>
 
 import subprocess
-
+import memory_profiler
+import time
 
 class Train(object):
     """
     Class to train various ML frameworks for Machine/Deep Learning.
 
     """
-    def __init__(self, input_file="../../data/text8", epochs=5, window=5, emb=100, batch_size=32, min_count=5, alpha=0.025, negative=5, sg=1):
+    def __init__(self, input_file="../../data/text8", epochs=5, window=5, emb=100, batch_size=32, min_count=5, alpha=0.025, negative=5, sg=1, workers=10):
         self.input_file = input_file
         self.epochs = epochs
         self.alpha = float(alpha)
@@ -25,12 +26,17 @@ class Train(object):
 
 
     def train_gensim(self):
+        start_time = time.time()
         proc = subprocess.Popen("python gensim_w2v_benchmark.py".split(), \
             stdout=subprocess.PIPE, \
             cwd="./nn_frameworks/gensim") # don't escape spaces in path
-        while proc.poll() is None:
-            output = proc.stdout.readline()
-            print output
+        peak_mem = memory_profiler.memory_usage(proc=proc, multiprocess=True, max_usage=True)
+        print "GENSIM : "
+        print "total training time : " + str(time.time() - start_time)
+        print "peak memory : " + str(peak_mem)
+        # while proc.poll() is None:
+        #     output = proc.stdout.readline()
+        #     print output
 
     def train_originalc(self):
         # escape spaces in path to corpus file
@@ -41,10 +47,14 @@ class Train(object):
             stdout=subprocess.PIPE, \
             stderr=subprocess.PIPE, \
             cwd="./nn_frameworks/originalc")
-        print proc.stderr
-        while proc.poll() is None:
-            output = proc.stdout.readline()
-            print output
+        peak_mem = memory_profiler.memory_usage(proc=proc, multiprocess=True, max_usage=True)
+        print "ORIGINALC : "
+        print "total training time : " + str(time.time() - start_time)
+        print "peak memory : " + str(peak_mem)
+        # print proc.stderr
+        # while proc.poll() is None:
+        #     output = proc.stdout.readline()
+        #     print output
 
     def train_tensorflow(self):
         cmd_str = "python word2vec.py --train_data " + self.input_file + " --save_path save/"
@@ -52,6 +62,24 @@ class Train(object):
         proc = subprocess.Popen(cmd_str.split(),
             stdout=subprocess.PIPE,
             cwd='./nn_frameworks/tensorflow')
-        while proc.poll() is None:
-            output = proc.stdout.readline()
-            print output
+        peak_mem = memory_profiler.memory_usage(proc=proc, multiprocess=True, max_usage=True)
+        print "TENSORFLOW : "
+        print "total training time : " + str(time.time() - start_time)
+        print "peak memory : " + str(peak_mem)
+        # while proc.poll() is None:
+        #     output = proc.stdout.readline()
+        #     print output
+
+    def train_dl4j(self):
+        cmd_str = "java -jar dl4j-examples-0.8-SNAPSHOT-jar-with-dependencies.jar"
+        print cmd_str
+        proc = subprocess.Popen(cmd_str.split(),
+            stdout=subprocess.PIPE,
+            cwd='./nn_frameworks/dl4j/dl4j-examples/dl4j-examples/target')
+        peak_mem = memory_profiler.memory_usage(proc=proc, multiprocess=True, max_usage=True)
+        print "DL4J : "
+        print "total training time : " + str(time.time() - start_time)
+        print "peak memory : " + str(peak_mem)
+        # while proc.poll() is None:
+        #     output = proc.stdout.readline()
+        #     print output

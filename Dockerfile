@@ -3,7 +3,7 @@ FROM tensorflow/tensorflow
 
 WORKDIR "/"
 
-# ADD . /
+ADD . /
 
 #setting up Java & Maven for dl4j
 RUN add-apt-repository -y ppa:webupd8team/java && \ 

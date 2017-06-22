@@ -10,3 +10,4 @@ if __name__ == '__main__':
     train.train_gensim()
     train.train_originalc()
     train.train_tensorflow()
+    train.train_dl4j()
