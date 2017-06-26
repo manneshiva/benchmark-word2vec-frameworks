@@ -45,11 +45,10 @@ class Train(object):
             + ' --negative ' + str(self.negative) \
             + ' --sg ' + str(self.sg) \
             + ' --workers ' + str(self.workers) \
-            + ' --sample ' + str(self.sample) \
-            + ' --workers ' + str(self.workers)
+            + ' --sample ' + str(self.sample)
         print cmd_str
         proc = subprocess.Popen(cmd_str.split(),
-            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
             cwd="./nn_frameworks/gensim")  # don't escape spaces in path
         peak_mem = memory_profiler.memory_usage(proc=proc, multiprocess=True, max_usage=True)
         with open(self.reportfile, 'a+') as f:
@@ -61,17 +60,30 @@ class Train(object):
 
     def train_originalc(self):
         # escape spaces in path to corpus file
-        cmd_str = "./word2vec -train " + self.input_file + " -output vectors.bin \
-            -cbow 0 -size 100 -window 5 -negative 25 -hs 0 -sample 1e-4 \
-            -threads 5 -binary 1 -iter 5"
-        proc = subprocess.Popen(cmd_str.split(), \
-            stdout=subprocess.PIPE, \
-            stderr=subprocess.PIPE, \
+        start_time = time.time()
+        cmd_str = './word2vec' + ' -train ../../' + str(self.file) \
+            + ' -size ' + str(self.size) \
+            + ' -output ../../' + str(self.outputpath) + 'originalc.vec' \
+            + ' --iter ' + str(self.epochs) \
+            + ' -window ' + str(self.window) \
+            + ' -min-count ' + str(self.min_count) \
+            + ' -alpha ' + str(self.alpha) \
+            + ' -negative ' + str(self.negative) \
+            + ' -cbow ' + str(int(not self.sg)) \
+            + ' -threads ' + str(self.workers) \
+            + ' -sample ' + str(self.sample) \
+            + ' -binary 0'
+        print cmd_str
+        proc = subprocess.Popen(cmd_str.split(),
+            stderr=subprocess.STDOUT,
             cwd="./nn_frameworks/originalc")
+        # proc.communicate()
         peak_mem = memory_profiler.memory_usage(proc=proc, multiprocess=True, max_usage=True)
         print "ORIGINALC : "
         print "total training time : " + str(time.time() - start_time)
         print "peak memory : " + str(peak_mem)
+        with open(self.reportfile, 'a+') as f:
+            f.write('originalc ' + str(time.time() - start_time) + ' ' + str(peak_mem) + '\n')
         # print proc.stderr
         # while proc.poll() is None:
         #     output = proc.stdout.readline()
