@@ -1,9 +1,10 @@
-# Use an official tensorflow-cpu as a base image
-FROM tensorflow/tensorflow
+# Use the official tensorflow-cpu as a base image
+# Pinned image version using it's digest
+FROM tensorflow/tensorflow@sha256:32333ab56f881c52482c522934f0a0c0f9c0b7cfd46dde20e9655623fba1b9d4
 
 WORKDIR "/"
 
-ADD . /
+#ADD . /
 
 #setting up Java & Maven for dl4j
 RUN add-apt-repository -y ppa:webupd8team/java && \ 
@@ -23,9 +24,9 @@ ENV PATH /maven/apache-maven-3.5.0/bin:$PATH
 
 # Install python packages
 RUN pip --no-cache-dir install \
-        gensim \
-        memory_profiler \
-        psutil
+        gensim==2.1.0 \
+        memory_profiler==0.47 \
+        psutil==5.2.2
 
 # Run bash when the container launches
 CMD /bin/bash
