@@ -1,4 +1,7 @@
-
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+#
+# Author: Shiva Manne <manneshiva@gmail.com>
 
 import gensim
 import logging
