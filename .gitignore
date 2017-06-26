@@ -1,0 +1,4 @@
+*.pyc
+report/*
+*.ipynb
+.ipynb_checkpoints
