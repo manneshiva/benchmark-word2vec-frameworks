@@ -6,34 +6,55 @@
 import subprocess
 import memory_profiler
 import time
+import sys
+import os
 
 class Train(object):
     """
     Class to train various ML frameworks for Machine/Deep Learning.
 
     """
-    def __init__(self, input_file="../../data/text8", epochs=5, window=5, emb=100, batch_size=32, min_count=5, alpha=0.025, negative=5, sg=1, workers=10):
-        self.input_file = input_file
+    def __init__(self, file, epochs, window, size, batch_size, min_count, alpha, negative, sg, workers, sample, outputpath, reportfile):
+        if os.path.isfile(file):
+            self.file = file
+        else:
+            sys.exit('Input file does not exist at the path provided.')
+        self.reportfile = reportfile
+        self.outputpath = outputpath
         self.epochs = epochs
         self.alpha = float(alpha)
         self.window = int(window)
         self.min_count = min_count
         self.sg = sg
-        self.emb = emb
+        self.size = size
         self.negative = negative
         self.batch_size = batch_size
-
+        self.workers = workers
+        self.sample = sample
 
 
     def train_gensim(self):
         start_time = time.time()
-        proc = subprocess.Popen("python gensim_w2v_benchmark.py".split(), \
-            stdout=subprocess.PIPE, \
-            cwd="./nn_frameworks/gensim") # don't escape spaces in path
+        cmd_str = 'python gensim_word2vec.py' + ' --file ../../' + str(self.file) \
+            + ' --size ' + str(self.size) \
+            + ' --outputpath ../../' + str(self.outputpath) \
+            + ' --iter ' + str(self.epochs) \
+            + ' --window ' + str(self.window) \
+            + ' --min_count ' + str(self.min_count) \
+            + ' --alpha ' + str(self.alpha) \
+            + ' --negative ' + str(self.negative) \
+            + ' --sg ' + str(self.sg) \
+            + ' --workers ' + str(self.workers) \
+            + ' --sample ' + str(self.sample) \
+            + ' --workers ' + str(self.workers)
+        print cmd_str
+        proc = subprocess.Popen(cmd_str.split(),
+            stdout=subprocess.PIPE,
+            cwd="./nn_frameworks/gensim")  # don't escape spaces in path
         peak_mem = memory_profiler.memory_usage(proc=proc, multiprocess=True, max_usage=True)
-        print "GENSIM : "
-        print "total training time : " + str(time.time() - start_time)
-        print "peak memory : " + str(peak_mem)
+        with open(self.reportfile, 'a+') as f:
+            f.write('gensim ' + str(time.time() - start_time) + ' ' + str(peak_mem) + '\n')
+
         # while proc.poll() is None:
         #     output = proc.stdout.readline()
         #     print output
