@@ -54,11 +54,9 @@ class Train(object):
         with open(self.reportfile, 'a+') as f:
             f.write('gensim ' + str(time.time() - start_time) + ' ' + str(peak_mem) + '\n')
 
-        # while proc.poll() is None:
-        #     output = proc.stdout.readline()
-        #     print output
 
     def train_originalc(self):
+        # no batch size parameter
         # escape spaces in path to corpus file
         start_time = time.time()
         cmd_str = './word2vec' + ' -train ../../' + str(self.file) \
@@ -77,31 +75,38 @@ class Train(object):
         proc = subprocess.Popen(cmd_str.split(),
             stderr=subprocess.STDOUT,
             cwd="./nn_frameworks/originalc")
-        # proc.communicate()
         peak_mem = memory_profiler.memory_usage(proc=proc, multiprocess=True, max_usage=True)
         print "ORIGINALC : "
         print "total training time : " + str(time.time() - start_time)
         print "peak memory : " + str(peak_mem)
         with open(self.reportfile, 'a+') as f:
             f.write('originalc ' + str(time.time() - start_time) + ' ' + str(peak_mem) + '\n')
-        # print proc.stderr
-        # while proc.poll() is None:
-        #     output = proc.stdout.readline()
-        #     print output
+
 
     def train_tensorflow(self):
-        cmd_str = "python word2vec.py --train_data " + self.input_file + " --save_path save/"
+        # only skipgram implementation
+        start_time = time.time()
+        cmd_str = 'python word2vec.py' + ' --train_data ../../' + str(self.file) \
+            + ' --embedding_size ' + str(self.size) \
+            + ' --save_path_wordvectors ../../' + str(self.outputpath) + 'tensorflow.vec' \
+            + ' --epochs_to_train ' + str(self.epochs) \
+            + ' --window_size ' + str(self.window) \
+            + ' --min_count ' + str(self.min_count) \
+            + ' --learning_rate ' + str(self.alpha) \
+            + ' --num_neg_samples' + str(self.negative) \
+            + ' --concurrent_steps ' + str(self.workers) \
+            + ' --subsample ' + str(self.sample) \
+            + ' --statistics_interval 5'
         print cmd_str
         proc = subprocess.Popen(cmd_str.split(),
-            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
             cwd='./nn_frameworks/tensorflow')
         peak_mem = memory_profiler.memory_usage(proc=proc, multiprocess=True, max_usage=True)
         print "TENSORFLOW : "
         print "total training time : " + str(time.time() - start_time)
         print "peak memory : " + str(peak_mem)
-        # while proc.poll() is None:
-        #     output = proc.stdout.readline()
-        #     print output
+        with open(self.reportfile, 'a+') as f:
+            f.write('tensorflow ' + str(time.time() - start_time) + ' ' + str(peak_mem) + '\n')
 
     def train_dl4j(self):
         cmd_str = "java -jar dl4j-examples-0.8-SNAPSHOT-jar-with-dependencies.jar"
