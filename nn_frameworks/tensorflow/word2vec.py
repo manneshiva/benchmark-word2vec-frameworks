@@ -76,19 +76,8 @@ flags.DEFINE_float("subsample", 1e-3,
                    "Subsample threshold for word occurrence. Words that appear "
                    "with higher frequency will be randomly down-sampled. Set "
                    "to 0 to disable.")
-flags.DEFINE_boolean(
-    "interactive", False,
-    "If true, enters an IPython interactive session to play with the trained "
-    "model. E.g., try model.analogy(b'france', b'paris', b'russia') and "
-    "model.nearby([b'proton', b'elephant', b'maxwell'])")
 flags.DEFINE_integer("statistics_interval", 5,
                      "Print statistics every n seconds.")
-flags.DEFINE_integer("summary_interval", 5,
-                     "Save training summary to file every n seconds (rounded "
-                     "up to statistics interval).")
-flags.DEFINE_integer("checkpoint_interval", 600,
-                     "Checkpoint the model (i.e. save the parameters) every n "
-                     "seconds (rounded up to statistics interval).")
 flags.DEFINE_string("save_path_wordvectors", None, "Path to file where word "
                     "vectors are to be written once training finishes.")
 
@@ -136,14 +125,6 @@ class Options(object):
 
     # How often to print statistics.
     self.statistics_interval = FLAGS.statistics_interval
-
-    # How often to write to the summary file (rounds up to the nearest
-    # statistics_interval).
-    self.summary_interval = FLAGS.summary_interval
-
-    # How often to write checkpoints (rounds up to the nearest statistics
-    # interval).
-    self.checkpoint_interval = FLAGS.checkpoint_interval
 
     # Eval options.
     # The text file for eval.
