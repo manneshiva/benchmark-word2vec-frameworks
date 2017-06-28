@@ -36,7 +36,28 @@ DL4J | Deeplearning4j is a commercial-grade, open-source, distributed deep-learn
  
  `sudo nvidia-docker run --rm -it benchmark_ml_frameworks:gpu`
 
+ ### Run
+ To run all the benchmarks, eg:
  
+ `python benchmark.py --file data/text8 --frameworks tensorflow gensim originalc --epochs 5 --size 100 --workers 4`
  
+ *usage help* : `python benchmark.py -h`
+ 
+ Available options:
+ 
+Parameter | Description
+-------- | ---
+ --frameworks | Specify frameworks to run the benchmarks on(demilited by space). If None provided, benchmarks will be run on all supported frameworks.
+ --file | Path to text corpus
+ --epochs | Number of iterations (epochs) over the corpus. Default : 5
+ --size | Dimensionality of the embeddings/feature vectors. Default : 100
+ --window | Maximum distance between the current and predicted word within a sentence. Default : 5
+ --min_count |  This will discard words that appear less than MIN_COUNT times. Default : 5
+ --workers |  Use these many worker threads to train the model. default : 5
+ --sample | Set threshold for occurrence of words. Those that appear with higher frequency in the training data will be randomly down-sampled; default is 1e-3, useful range is (0, 1e-5)
+--sg | Use the skip-gram model; default is 1 (use 0 for continuous bag of words model)
+--negative | Number of negative examples; default is 5, common values are 3 - 10 (0 = not used)
+--alpha | The initial learning rate. Default : 0.025
+
   ## Running benchmark on cloud
   [TODO]
