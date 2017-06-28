@@ -8,6 +8,7 @@ import argparse
 import sys
 import os
 from textwrap import wrap
+from numpy import arange, linspace
 import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
@@ -17,13 +18,23 @@ import matplotlib.pyplot as plt
 
 TIME_MEM_REPORT_FILENAME = 'report/time&peakmemoryReport.txt'
 TIME_MEM_FIG_FILENAME = 'report/time&peakmemoryFig.jpg'
-TRAINED_VEC_SAVE_DIR = 'trainedVectors/'
+EVAL_WORD_VEC_REPORT_FILENAME = 'report/eval-word-vectors-Report.txt'
+EVAL_WORD_VEC_FIG_FILENAME = 'report/eval-word-vectors-Fig.jpg'
 
 # Clear old reports
-if os.path.isfile(TIME_MEM_REPORT_FILENAME):
-    os.remove(TIME_MEM_REPORT_FILENAME)
-if os.path.isfile(TIME_MEM_FIG_FILENAME):
-    os.remove(TIME_MEM_FIG_FILENAME)
+# if os.path.isfile(TIME_MEM_REPORT_FILENAME):
+#     os.remove(TIME_MEM_REPORT_FILENAME)
+# if os.path.isfile(TIME_MEM_FIG_FILENAME):
+#     os.remove(TIME_MEM_FIG_FILENAME)
+# if os.path.isfile(EVAL_WORD_VEC_REPORT_FILENAME):
+#     os.remove(EVAL_WORD_VEC_REPORT_FILENAME)
+# if os.path.isfile(EVAL_WORD_VEC_FIG_FILENAME):
+#     os.remove(EVAL_WORD_VEC_FIG_FILENAME)
+
+TRAINED_VEC_SAVE_DIR = 'trainedVectors/'
+# ensure dir exists
+if not os.path.exists(TRAINED_VEC_SAVE_DIR):
+    os.makedirs(TRAINED_VEC_SAVE_DIR)
 
 def plot_time_peak_mem(fname, config_str, fig_fname):
     """
@@ -32,16 +43,16 @@ def plot_time_peak_mem(fname, config_str, fig_fname):
     """
     with open(fname, 'r') as f:
         lines = [line.rstrip('\n').split() for line in f]
-    results = zip(*lines[:-1])  # leave last line, contain just a new line
+    results = zip(*lines[:])  # leave last line, contains just a new line
     frameworks = results[0]
     train_times = results[1]
     peak_mems = results[2]
-
+    print frameworks
     fig = plt.figure(figsize=(10, 15))
     ax = fig.add_subplot(111)
-    width = 0.25
-    pos = [(i, i + width, i + 2 * width) for i in range(2)]
-    colors = ['red', 'black', 'yellow', 'blue', 'green']
+    width = 0.1
+    pos = [arange(i, i + len(frameworks) * width, width) for i in range(2)]
+    colors = ['red', 'black', 'yellow', 'blue', 'green', 'orange', 'grey']
     acc_ax = ax.twinx()
     # Training time
     ax.bar(pos[0],
@@ -65,6 +76,45 @@ def plot_time_peak_mem(fname, config_str, fig_fname):
     acc_ax.set_xticklabels([''] * 2)  # use empty labels to hide xticklabels
     # Proxy plots for adding legend correctly
     proxies = [ax.bar([0], [0], width=0, color=colors[i], alpha=0.5)[0] for i in range(len(frameworks))]
+    plt.legend((proxies), frameworks, loc='best')
+    plt.grid()
+    plt.savefig(fig_fname)
+    return
+
+
+def plot_eval_word_vec(fname, fig_fname):
+    """
+    Plot the eval-word-vectors report and save to a .jpg figure
+
+    """
+    with open(fname, 'r') as f:
+        lines = [line.rstrip('\n').split() for line in f]
+    results = zip(*lines[:])
+    num_frameworks = len(set(results[0]))
+    num_datasets = len(lines) / num_frameworks
+    frameworks = results[0][::num_datasets]
+    fig = plt.figure(figsize=(10, 15))
+    ax = fig.add_subplot(111)
+    pos = [linspace(i + 0.25, i + 0.75, num=num_frameworks, endpoint=False) for i in range(num_datasets)]
+    width = pos[0][1] - pos[0][0]
+    colors = ['red', 'black', 'yellow', 'blue', 'green', 'orange', 'grey']
+    # Plot each dataset
+    for i in range(num_datasets):
+        print pos[i]
+        print results[2][i::num_datasets]
+        ax.bar(pos[i],
+            results[2][i::num_datasets],
+            width,
+            alpha=0.5,
+            color=colors
+            )
+    ax.set_ylabel('Spearman\'s Rho')
+    ax.set_xlabel('Dataset')
+    ax.set_xticks([0.5 + i for i in range(num_datasets)])
+    ax.set_xticklabels(results[1][:num_datasets], rotation='vertical')
+    ax.set_title('eval-word-vectors Report')
+    # Proxy plots for adding legend correctly
+    proxies = [ax.bar([0], [0], width=0, color=colors[i], alpha=0.5)[0] for i in range(num_frameworks)]
     plt.legend((proxies), frameworks, loc='best')
     plt.grid()
     plt.savefig(fig_fname)
@@ -102,9 +152,10 @@ if __name__ == '__main__':
     print params
     train = Train(**params)
     # print options.frameworks
-    
-    for framework in options.frameworks:
-        getattr(train, 'train_' + framework)()
-    # config_str = ', '.join("%s=%r" % (key, val) for (key, val) in options_dict.iteritems())
-    # plot_time_peak_mem(TIME_MEM_REPORT_FILENAME, config_str, TIME_MEM_FIG_FILENAME)
+
+    # for framework in options.frameworks:
+    #     getattr(train, 'train_' + framework)()
+    config_str = ', '.join("%s=%r" % (key, val) for (key, val) in vars(options).iteritems())
+    plot_time_peak_mem(TIME_MEM_REPORT_FILENAME, config_str, TIME_MEM_FIG_FILENAME)
+    plot_eval_word_vec(EVAL_WORD_VEC_REPORT_FILENAME, EVAL_WORD_VEC_FIG_FILENAME)
     # print options
