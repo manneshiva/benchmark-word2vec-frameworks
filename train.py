@@ -8,6 +8,8 @@ import memory_profiler
 import time
 import sys
 import os
+from subprocess import call
+
 
 class Train(object):
     """
@@ -51,6 +53,8 @@ class Train(object):
             stderr=subprocess.STDOUT,
             cwd="./nn_frameworks/gensim")  # don't escape spaces in path
         peak_mem = memory_profiler.memory_usage(proc=proc, multiprocess=True, max_usage=True)
+        # delete first line from .vec file, consists of vocab size, embedding size
+        call(['sed', '-i', '1d', self.outputpath + 'gensim.vec'])
         with open(self.reportfile, 'a+') as f:
             f.write('gensim ' + str(time.time() - start_time) + ' ' + str(peak_mem) + '\n')
 
@@ -76,6 +80,8 @@ class Train(object):
             stderr=subprocess.STDOUT,
             cwd="./nn_frameworks/originalc")
         peak_mem = memory_profiler.memory_usage(proc=proc, multiprocess=True, max_usage=True)
+        # delete first line from .vec file, consists of vocab size, embedding size
+        call(['sed', '-i', '1d', self.outputpath + 'originalc.vec'])
         print "ORIGINALC : "
         print "total training time : " + str(time.time() - start_time)
         print "peak memory : " + str(peak_mem)
@@ -96,6 +102,7 @@ class Train(object):
             + ' --num_neg_samples' + str(self.negative) \
             + ' --concurrent_steps ' + str(self.workers) \
             + ' --subsample ' + str(self.sample) \
+            + ' --batch_size ' + str(self.batch_size) \
             + ' --statistics_interval 5'
         print cmd_str
         proc = subprocess.Popen(cmd_str.split(),
