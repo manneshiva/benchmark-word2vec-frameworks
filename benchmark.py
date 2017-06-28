@@ -8,33 +8,40 @@ import argparse
 import sys
 import os
 from textwrap import wrap
-from numpy import arange, linspace
+from numpy import linspace
 import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
+from subprocess import call
 
 
-
-
+REPORT_DIR = 'report/'
 TIME_MEM_REPORT_FILENAME = 'report/time&peakmemoryReport.txt'
 TIME_MEM_FIG_FILENAME = 'report/time&peakmemoryFig.jpg'
 EVAL_WORD_VEC_REPORT_FILENAME = 'report/eval-word-vectors-Report.txt'
 EVAL_WORD_VEC_FIG_FILENAME = 'report/eval-word-vectors-Fig.jpg'
-
-# Clear old reports
-# if os.path.isfile(TIME_MEM_REPORT_FILENAME):
-#     os.remove(TIME_MEM_REPORT_FILENAME)
-# if os.path.isfile(TIME_MEM_FIG_FILENAME):
-#     os.remove(TIME_MEM_FIG_FILENAME)
-# if os.path.isfile(EVAL_WORD_VEC_REPORT_FILENAME):
-#     os.remove(EVAL_WORD_VEC_REPORT_FILENAME)
-# if os.path.isfile(EVAL_WORD_VEC_FIG_FILENAME):
-#     os.remove(EVAL_WORD_VEC_FIG_FILENAME)
-
 TRAINED_VEC_SAVE_DIR = 'trainedVectors/'
-# ensure dir exists
-if not os.path.exists(TRAINED_VEC_SAVE_DIR):
-    os.makedirs(TRAINED_VEC_SAVE_DIR)
+
+
+def prepare_dir_files():
+    """
+    Ensure directories exist and clear old report files/figures.
+    """
+    # Ensure dir exists
+    if not os.path.exists(REPORT_DIR):
+        os.makedirs(REPORT_DIR)
+    if not os.path.exists(TRAINED_VEC_SAVE_DIR):
+        os.makedirs(TRAINED_VEC_SAVE_DIR)
+    # Clear old reports
+    if os.path.isfile(TIME_MEM_REPORT_FILENAME):
+        os.remove(TIME_MEM_REPORT_FILENAME)
+    if os.path.isfile(TIME_MEM_FIG_FILENAME):
+        os.remove(TIME_MEM_FIG_FILENAME)
+    if os.path.isfile(EVAL_WORD_VEC_REPORT_FILENAME):
+        os.remove(EVAL_WORD_VEC_REPORT_FILENAME)
+    if os.path.isfile(EVAL_WORD_VEC_FIG_FILENAME):
+        os.remove(EVAL_WORD_VEC_FIG_FILENAME)
+
 
 def plot_time_peak_mem(fname, config_str, fig_fname):
     """
@@ -50,8 +57,8 @@ def plot_time_peak_mem(fname, config_str, fig_fname):
     print frameworks
     fig = plt.figure(figsize=(10, 15))
     ax = fig.add_subplot(111)
-    width = 0.1
-    pos = [arange(i, i + len(frameworks) * width, width) for i in range(2)]
+    pos = [linspace(i + 0.25, i + 0.75, num=len(frameworks), endpoint=False) for i in range(2)]
+    width = pos[0][1] - pos[0][0]
     colors = ['red', 'black', 'yellow', 'blue', 'green', 'orange', 'grey']
     acc_ax = ax.twinx()
     # Training time
@@ -93,7 +100,7 @@ def plot_eval_word_vec(fname, fig_fname):
     num_frameworks = len(set(results[0]))
     num_datasets = len(lines) / num_frameworks
     frameworks = results[0][::num_datasets]
-    fig = plt.figure(figsize=(10, 15))
+    fig = plt.figure(figsize=(40, 15))
     ax = fig.add_subplot(111)
     pos = [linspace(i + 0.25, i + 0.75, num=num_frameworks, endpoint=False) for i in range(num_datasets)]
     width = pos[0][1] - pos[0][0]
@@ -120,6 +127,7 @@ def plot_eval_word_vec(fname, fig_fname):
     plt.savefig(fig_fname)
     return
 
+
 def parse_args(args):
     parser = argparse.ArgumentParser()
     parser.add_argument('--file', help='Path to text corpus', required=True)
@@ -138,24 +146,27 @@ def parse_args(args):
     parser.add_argument('--log-level', default='INFO', help='Specify logging level. Default : INFO')
     return parser.parse_args(args)
 
-if __name__ == '__main__':
-    print sys.argv
-    options = parse_args(sys.argv[1:])
-    print options
-    print options.frameworks
-    # convert options to a string of key,value pairs(config_str)
+
+def prepare_params(options):
     params = vars(options).copy()  # ensure original options not modified
     params.pop('frameworks')
     params.pop('log_level')
     params['outputpath'] = TRAINED_VEC_SAVE_DIR
     params['reportfile'] = TIME_MEM_REPORT_FILENAME
-    print params
-    train = Train(**params)
-    # print options.frameworks
+    return params
+if __name__ == '__main__':
 
-    # for framework in options.frameworks:
-    #     getattr(train, 'train_' + framework)()
+    options = parse_args(sys.argv[1:])
+    # get only those params required for training
+    params = prepare_params(options)
+    train = Train(**params)
+    prepare_dir_files()
+    for framework in options.frameworks:
+        getattr(train, 'train_' + framework)()
+        call(['python', 'eval_word_vectors/all_wordsim.py', TRAINED_VEC_SAVE_DIR + framework + '.vec', 'eval_word_vectors/data/word-sim/', framework, EVAL_WORD_VEC_REPORT_FILENAME])
+    # config_str - useful for showing training params in the final plots
     config_str = ', '.join("%s=%r" % (key, val) for (key, val) in vars(options).iteritems())
-    plot_time_peak_mem(TIME_MEM_REPORT_FILENAME, config_str, TIME_MEM_FIG_FILENAME)
-    plot_eval_word_vec(EVAL_WORD_VEC_REPORT_FILENAME, EVAL_WORD_VEC_FIG_FILENAME)
-    # print options
+    # Plot comparision figures only if 2 or more frameworks
+    if len(options.frameworks) > 1:
+        plot_time_peak_mem(TIME_MEM_REPORT_FILENAME, config_str, TIME_MEM_FIG_FILENAME)
+        plot_eval_word_vec(EVAL_WORD_VEC_REPORT_FILENAME, EVAL_WORD_VEC_FIG_FILENAME)
