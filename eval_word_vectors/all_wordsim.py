@@ -29,8 +29,9 @@ if __name__ == '__main__':
       else:
         not_found += 1
       total_size += 1
+    rho = spearmans_rho(assign_ranks(manual_dict), assign_ranks(auto_dict))
     print "%6s" % str(i + 1), "%20s" % filename, "%15s" % str(total_size),
     print "%15s" % str(not_found),
-    print "%15.4f" % spearmans_rho(assign_ranks(manual_dict), assign_ranks(auto_dict))
+    print "%15.4f" % rho
     with open(reportfile, 'a+') as f:
-            f.write("%s %s %s\n" % (framework, filename, spearmans_rho(assign_ranks(manual_dict), assign_ranks(auto_dict))))
+            f.write("%s %s %s\n" % (framework, filename, rho))
