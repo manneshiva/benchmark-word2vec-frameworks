@@ -7,6 +7,7 @@ from train import Train
 import argparse
 import sys
 import os
+import gensim
 from textwrap import wrap
 from numpy import linspace
 import matplotlib
@@ -21,7 +22,9 @@ TIME_MEM_FIG_FILENAME = 'report/time&peakmemoryFig.jpg'
 EVAL_WORD_VEC_REPORT_FILENAME = 'report/eval-word-vectors-Report.txt'
 EVAL_WORD_VEC_FIG_FILENAME = 'report/eval-word-vectors-Fig.jpg'
 TRAINED_VEC_SAVE_DIR = 'trainedVectors/'
-
+EVAL_QA_REPORT_FILENAME = 'report/eval-qa-Report.txt'
+EVAL_QA_FIG_FILENAME = 'report/eval-qa-Fig.jpg'
+QA_FILE_PATH = 'data/questions-words.txt'
 
 def prepare_dir_files():
     """
@@ -41,6 +44,10 @@ def prepare_dir_files():
         os.remove(EVAL_WORD_VEC_REPORT_FILENAME)
     if os.path.isfile(EVAL_WORD_VEC_FIG_FILENAME):
         os.remove(EVAL_WORD_VEC_FIG_FILENAME)
+    if os.path.isfile(EVAL_QA_REPORT_FILENAME):
+        os.remove(EVAL_QA_REPORT_FILENAME)
+    if os.path.isfile(EVAL_QA_FIG_FILENAME):
+        os.remove(EVAL_QA_FIG_FILENAME)
 
 
 def plot_time_peak_mem(fname, config_str, fig_fname):
@@ -89,7 +96,7 @@ def plot_time_peak_mem(fname, config_str, fig_fname):
     return
 
 
-def plot_eval_word_vec(fname, fig_fname):
+def plot_eval_word_vec(fname, fig_fname, title):
     """
     Plot the eval-word-vectors report and save to a .jpg figure
 
@@ -119,13 +126,29 @@ def plot_eval_word_vec(fname, fig_fname):
     ax.set_xlabel('Dataset')
     ax.set_xticks([0.5 + i for i in range(num_datasets)])
     ax.set_xticklabels(results[1][:num_datasets], rotation='vertical')
-    ax.set_title('eval-word-vectors Report')
+    ax.set_title(title)
     # Proxy plots for adding legend correctly
     proxies = [ax.bar([0], [0], width=0, color=colors[i], alpha=0.5)[0] for i in range(num_frameworks)]
     plt.legend((proxies), frameworks, loc='best')
     plt.grid()
     plt.savefig(fig_fname)
     return
+
+
+def eval_question_answer(pathQuestions, framework, trainedvectordir, reportfile):
+    model = gensim.models.KeyedVectors.load_word2vec_format(trainedvectordir + framework + '.vec')
+    acc = model.accuracy(pathQuestions)
+    with open(reportfile, 'a+') as f:
+        for section in acc:
+            num_correct = float(len(section['correct']))
+            num_incorrect = float(len(section['incorrect']))
+            if(num_correct + num_incorrect) == 0:
+                f.write("%s %s %s\n" % (framework, section['section'], str(0.0)))
+            else:
+                f.write("%s %s %s\n" % (framework, section['section'], str(100.0 * (num_correct/(num_correct + num_incorrect)))))
+            # print section['section'] + " : " + str(100.0 * (num_correct/(num_correct + num_incorrect)))
+
+
 
 
 def parse_args(args):
@@ -163,10 +186,12 @@ if __name__ == '__main__':
     prepare_dir_files()
     for framework in options.frameworks:
         getattr(train, 'train_' + framework)()
+        eval_question_answer(QA_FILE_PATH, framework, TRAINED_VEC_SAVE_DIR, EVAL_QA_REPORT_FILENAME)
         call(['python', 'eval_word_vectors/all_wordsim.py', TRAINED_VEC_SAVE_DIR + framework + '.vec', 'eval_word_vectors/data/word-sim/', framework, EVAL_WORD_VEC_REPORT_FILENAME])
     # config_str - useful for showing training params in the final plots
     config_str = ', '.join("%s=%r" % (key, val) for (key, val) in vars(options).iteritems())
     # Plot comparision figures only if 2 or more frameworks
     if len(options.frameworks) > 1:
         plot_time_peak_mem(TIME_MEM_REPORT_FILENAME, config_str, TIME_MEM_FIG_FILENAME)
-        plot_eval_word_vec(EVAL_WORD_VEC_REPORT_FILENAME, EVAL_WORD_VEC_FIG_FILENAME)
+        plot_eval_word_vec(EVAL_WORD_VEC_REPORT_FILENAME, EVAL_WORD_VEC_FIG_FILENAME, 'eval-word-pairs Report')
+        plot_eval_word_vec(EVAL_QA_REPORT_FILENAME, EVAL_QA_FIG_FILENAME, 'eval-q&a Report')

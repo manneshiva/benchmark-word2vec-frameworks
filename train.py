@@ -54,7 +54,7 @@ class Train(object):
             cwd="./nn_frameworks/gensim")  # don't escape spaces in path
         peak_mem = memory_profiler.memory_usage(proc=proc, multiprocess=True, max_usage=True)
         # delete first line from .vec file, consists of vocab size, embedding size
-        call(['sed', '-i', '1d', self.outputpath + 'gensim.vec'])
+        # call(['sed', '-i', '1d', self.outputpath + 'gensim.vec'])
         with open(self.reportfile, 'a+') as f:
             f.write('gensim ' + str(time.time() - start_time) + ' ' + str(peak_mem) + '\n')
 
@@ -81,7 +81,7 @@ class Train(object):
             cwd="./nn_frameworks/originalc")
         peak_mem = memory_profiler.memory_usage(proc=proc, multiprocess=True, max_usage=True)
         # delete first line from .vec file, consists of vocab size, embedding size
-        call(['sed', '-i', '1d', self.outputpath + 'originalc.vec'])
+        # call(['sed', '-i', '1d', self.outputpath + 'originalc.vec'])
         print "ORIGINALC : "
         print "total training time : " + str(time.time() - start_time)
         print "peak memory : " + str(peak_mem)
