@@ -19,12 +19,13 @@ from subprocess import call
 REPORT_DIR = 'report/'
 TIME_MEM_REPORT_FILENAME = 'report/time&peakmemoryReport.txt'
 TIME_MEM_FIG_FILENAME = 'report/time&peakmemoryFig.jpg'
-EVAL_WORD_VEC_REPORT_FILENAME = 'report/eval-word-vectors-Report.txt'
-EVAL_WORD_VEC_FIG_FILENAME = 'report/eval-word-vectors-Fig.jpg'
+EVAL_WORD_VEC_REPORT_FILENAME = 'report/word-pairs-report.txt'
+EVAL_WORD_VEC_FIG_FILENAME = 'report/word-pairs-report-fig.jpg'
 TRAINED_VEC_SAVE_DIR = 'trainedVectors/'
-EVAL_QA_REPORT_FILENAME = 'report/eval-qa-Report.txt'
-EVAL_QA_FIG_FILENAME = 'report/eval-qa-Fig.jpg'
+EVAL_QA_REPORT_FILENAME = 'report/question-answer-report.txt'
+EVAL_QA_FIG_FILENAME = 'report/question-answer-fig.jpg'
 QA_FILE_PATH = 'data/questions-words.txt'
+WORD_PAIRS_DIR = 'data/word-sim/'
 
 def prepare_dir_files():
     """
@@ -96,7 +97,7 @@ def plot_time_peak_mem(fname, config_str, fig_fname):
     return
 
 
-def plot_eval_word_vec(fname, fig_fname, title):
+def plot_word_eval_report(fname, fig_fname, title, analogies=True):
     """
     Plot the eval-word-vectors report and save to a .jpg figure
 
@@ -107,48 +108,72 @@ def plot_eval_word_vec(fname, fig_fname, title):
     num_frameworks = len(set(results[0]))
     num_datasets = len(lines) / num_frameworks
     frameworks = results[0][::num_datasets]
-    fig = plt.figure(figsize=(40, 15))
+    fig = plt.figure(figsize=(40, 25))
     ax = fig.add_subplot(111)
     pos = [linspace(i + 0.25, i + 0.75, num=num_frameworks, endpoint=False) for i in range(num_datasets)]
     width = pos[0][1] - pos[0][0]
     colors = ['red', 'black', 'yellow', 'blue', 'green', 'orange', 'grey']
     # Plot each dataset
     for i in range(num_datasets):
-        print pos[i]
-        print results[2][i::num_datasets]
         ax.bar(pos[i],
             results[2][i::num_datasets],
             width,
             alpha=0.5,
             color=colors
             )
-    ax.set_ylabel('Spearman\'s Rho')
-    ax.set_xlabel('Dataset')
+    if analogies:
+        ax.set_ylabel('Accuracy (%)')
+        ax.set_xlabel('Section')
+    else:
+        ax.set_ylabel('Spearman\'s Rho')
+        ax.set_xlabel('Dataset')
     ax.set_xticks([0.5 + i for i in range(num_datasets)])
-    ax.set_xticklabels(results[1][:num_datasets], rotation='vertical')
+    ax.set_xticklabels(results[1][:num_datasets], rotation=45, fontsize='large')
     ax.set_title(title)
     # Proxy plots for adding legend correctly
     proxies = [ax.bar([0], [0], width=0, color=colors[i], alpha=0.5)[0] for i in range(num_frameworks)]
-    plt.legend((proxies), frameworks, loc='best')
+    plt.legend((proxies), frameworks, loc='best', prop={'size': 30})
+    for item in [ax.title, ax.xaxis.label, ax.yaxis.label] + ax.get_yticklabels():
+        item.set_fontsize(30)
+    # ax.get_xticklabels().set_fontsize(20)
     plt.grid()
     plt.savefig(fig_fname)
     return
 
 
-def eval_question_answer(pathQuestions, framework, trainedvectordir, reportfile):
+def clean_old_reports():
+    # clean old reports
+    if os.path.isfile(EVAL_WORD_VEC_REPORT_FILENAME):
+        os.remove(EVAL_WORD_VEC_REPORT_FILENAME)
+    if os.path.isfile(EVAL_WORD_VEC_FIG_FILENAME):
+        os.remove(EVAL_WORD_VEC_FIG_FILENAME)
+    if os.path.isfile(EVAL_QA_REPORT_FILENAME):
+        os.remove(EVAL_QA_REPORT_FILENAME)
+    if os.path.isfile(EVAL_QA_FIG_FILENAME):
+        os.remove(EVAL_QA_FIG_FILENAME)
+
+
+def eval_word_vectors(pathQuestions, pathWordPairs, framework, trainedvectordir, reportdir):
+    # load trained vectors
     model = gensim.models.KeyedVectors.load_word2vec_format(trainedvectordir + framework + '.vec')
+    #  Evaluate word vectors on question-answer (analogies) task
     acc = model.accuracy(pathQuestions)
-    with open(reportfile, 'a+') as f:
+    with open(reportdir + 'question-answer-report.txt', 'a+') as f:
         for section in acc:
             num_correct = float(len(section['correct']))
             num_incorrect = float(len(section['incorrect']))
-            if(num_correct + num_incorrect) == 0:
+            if(num_correct + num_incorrect) == 0:  # if none of words present in vocab
                 f.write("%s %s %s\n" % (framework, section['section'], str(0.0)))
             else:
                 f.write("%s %s %s\n" % (framework, section['section'], str(100.0 * (num_correct/(num_correct + num_incorrect)))))
-            # print section['section'] + " : " + str(100.0 * (num_correct/(num_correct + num_incorrect)))
-
-
+    #  Evaluate word vectos on word-pairs
+    with open(reportdir + 'word-pairs-report.txt', 'a+') as f:
+        for filename in sorted(os.listdir(pathWordPairs)):
+            try:
+                rho = model.evaluate_word_pairs(os.path.join(pathWordPairs, filename))[1][0]
+            except:
+                rho = model.evaluate_word_pairs(os.path.join(pathWordPairs, filename), delimiter= ' ')[1][0]
+            f.write("%s %s %s\n" % (framework, filename, rho))
 
 
 def parse_args(args):
@@ -184,14 +209,23 @@ if __name__ == '__main__':
     params = prepare_params(options)
     train = Train(**params)
     prepare_dir_files()
+    clean_old_reports()
     for framework in options.frameworks:
         getattr(train, 'train_' + framework)()
-        eval_question_answer(QA_FILE_PATH, framework, TRAINED_VEC_SAVE_DIR, EVAL_QA_REPORT_FILENAME)
-        call(['python', 'eval_word_vectors/all_wordsim.py', TRAINED_VEC_SAVE_DIR + framework + '.vec', 'eval_word_vectors/data/word-sim/', framework, EVAL_WORD_VEC_REPORT_FILENAME])
+        print 'Evaluating trained word vectors\' quality for %s...' % framework
+        eval_word_vectors(QA_FILE_PATH, WORD_PAIRS_DIR, framework, TRAINED_VEC_SAVE_DIR, REPORT_DIR)
+        # call(['python', 'eval_word_vectors/all_wordsim.py', TRAINED_VEC_SAVE_DIR + framework + '.vec', 'eval_word_vectors/data/word-sim/', framework, EVAL_WORD_VEC_REPORT_FILENAME])
+    print 'Trained all frameworks!'
+    print 'Reports generated!'
     # config_str - useful for showing training params in the final plots
     config_str = ', '.join("%s=%r" % (key, val) for (key, val) in vars(options).iteritems())
     # Plot comparision figures only if 2 or more frameworks
+    print 'Plotting reports...'
     if len(options.frameworks) > 1:
         plot_time_peak_mem(TIME_MEM_REPORT_FILENAME, config_str, TIME_MEM_FIG_FILENAME)
-        plot_eval_word_vec(EVAL_WORD_VEC_REPORT_FILENAME, EVAL_WORD_VEC_FIG_FILENAME, 'eval-word-pairs Report')
-        plot_eval_word_vec(EVAL_QA_REPORT_FILENAME, EVAL_QA_FIG_FILENAME, 'eval-q&a Report')
+        print 'Plotted Time-Memory Report.'
+        plot_word_eval_report(EVAL_WORD_VEC_REPORT_FILENAME, EVAL_WORD_VEC_FIG_FILENAME, 'Word Pairs Evaluation Report', analogies=False)
+        print 'Plotted \'Word Pairs Evaluation\' Report.'
+        plot_word_eval_report(EVAL_QA_REPORT_FILENAME, EVAL_QA_FIG_FILENAME, 'Analogies Task(Questions&Answers) Report', analogies=True)
+        print 'Plotted \'Analogies Task(Question&Answers)\' Report.'
+    print 'Finished running the benchmark!!!'
