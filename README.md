@@ -59,5 +59,6 @@ Parameter | Description
 --negative | Number of negative examples; default is 5, common values are 3 - 10 (0 = not used)
 --alpha | The initial learning rate. Default : 0.025
 
+On completion, the reports can be found in `report/` folder.
   ## Running benchmark on cloud
   [TODO]
