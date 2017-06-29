@@ -3,3 +3,4 @@ report/*
 trainedVectors/*
 *.ipynb
 .ipynb_checkpoints
+!run_benchmark.ipynb
