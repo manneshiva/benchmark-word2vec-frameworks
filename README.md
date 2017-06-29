@@ -63,5 +63,19 @@ Parameter | Description
 --alpha | The initial learning rate. Default : 0.025
 
 On completion, the reports can be found in `report/` folder.
+
+### Jupyter Notebook
+Assuming you have cloned the repo and are currently in the directory containing this readme file, run the command:
+
+```sudo docker run -v absPathTo/benmark_ml_frameworks/:/benmark_ml_frameworks/ --rm -it -p 8888:8888 benchmark_ml_frameworks:cpu ```
+
+Once inside the docker:
+
+```cd benchmark_ml_framework ```
+
+Fire up the notebook and go to localhost:8888
+
+```jupyter notebook ```
+
   ## Running benchmark on cloud
   [TODO]
