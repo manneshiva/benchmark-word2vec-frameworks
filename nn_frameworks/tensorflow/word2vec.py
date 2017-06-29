@@ -319,6 +319,7 @@ class Word2Vec(object):
     opts = self._options
     emb_final = tf.nn.l2_normalize(self._emb, 1).eval()
     with open(opts.save_path_wordvectors, "w") as f:
+      f.write("%s %s\n" % (str(opts.vocab_size), str(opts.emb_dim)))
       for i in xrange(opts.vocab_size):
         vocab_word = tf.compat.as_text(opts.vocab_words[i]).encode("utf-8")
         vec = emb_final[self._word2id[vocab_word]]
