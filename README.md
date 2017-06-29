@@ -67,15 +67,15 @@ On completion, the reports can be found in `report/` folder.
 ### Jupyter Notebook
 Assuming you have cloned the repo and are currently in the directory containing this readme file, run the command:
 
-```sudo docker run -v absPathTo/benmark_ml_frameworks/:/benmark_ml_frameworks/ --rm -it -p 8888:8888 benchmark_ml_frameworks:cpu ```
+```sudo docker run -v absPathTo/benchmark_ml_frameworks/:/benchmark_ml_frameworks/ --rm -it -p 8888:8888 benchmark_ml_frameworks:cpu ```
 
 Once inside the docker:
 
 ```cd benchmark_ml_framework ```
 
-Fire up the notebook and go to localhost:8888
+Fire up the notebook, go to localhost:8888 and open run_benchmark.ipynb
 
-```jupyter notebook ```
+```jupyter notebook --allow-root ```
 
   ## Running benchmark on cloud
   [TODO]
