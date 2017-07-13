@@ -64,6 +64,12 @@ Parameter | Description
 
 On completion, the reports can be found in `report/` folder.
 
+To generate graphics from these reports, run:
+
+`python generate_plots.py`
+
+The plots are saved in the `report/` folder
+
 ### Jupyter Notebook
 Assuming you have cloned the repo and are currently in the directory containing this readme file, run the command:
 
