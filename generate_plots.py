@@ -121,4 +121,4 @@ if __name__ == '__main__':
     print 'Plotted \'Word Pairs Evaluation\' Report.'
     plot_word_eval_report(EVAL_QA_REPORT_FILENAME, EVAL_QA_FIG_FILENAME, 'Analogies Task(Questions&Answers) Report', analogies=True)
     print 'Plotted \'Analogies Task(Question&Answers)\' Report.'
-    print 'Finished running the benchmark!!!'
+    print 'Finished plotting the benchmark!!!'
