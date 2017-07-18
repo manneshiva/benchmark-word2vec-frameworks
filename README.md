@@ -21,16 +21,16 @@ DL4J | Deeplearning4j is a commercial-grade, open-source, distributed deep-learn
  For the purpose of reproducibilty, the benchmarks need to be run inside a [docker](https://docs.docker.com/).
  - Build your own docker using the `Docker` file provided in the repo. This step assumes you have [installed docker](https://docs.docker.com/engine/installation/linux/ubuntu/#install-using-the-repository). Run the following command inside the repo directory.
  
- `sudo docker build -t benchmark_ml_frameworks:cpu .`
+ `sudo docker build -f Dockerfile-cpu -t benchmark_ml_frameworks:cpu .`
  
  - Download the pre-built docker image from Docker's public [registry](https://cloud.docker.com/).
  
  `sudo docker pull [TODO]`
  
- ##### GPU benchmarks [TODO: add Docker.gpu]
+ ##### GPU benchmarks
  Exploiting GPU to train word vectors inside docker requires `nvidia-docker`. Requirements, installation guide and why it is necessary can be found [here](https://github.com/NVIDIA/nvidia-docker). Follow the same steps mentioned above replacing `docker` with `nvidia-docker` and `benchmark_ml_frameworks:cpu` with `benchmark_ml_frameworks:gpu`.
  
- ```sudo nvidia-docker build -f Dockerfile.gpu -t benchmark_ml_frameworks:gpu .```
+ ```sudo nvidia-docker build -f Dockerfile-gpu -t benchmark_ml_frameworks:gpu .```
  
  
 **Run the docker image**:
