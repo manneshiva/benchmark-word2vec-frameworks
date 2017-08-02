@@ -125,10 +125,19 @@ class Train(object):
                     + ' --batch_size ' + str(self.batch_size) \
                     + ' --statistics_interval 5'
         # TODO : 1. issues while running single line text files
-        #        2. add parameters
         elif framework == 'dl4j':
-            cwd = './nn_frameworks/dl4j'
-            cmd_str = "java -jar dl4j-examples-0.8-SNAPSHOT-jar-with-dependencies.jar"
+            cwd = './nn_frameworks/dl4j/target'
+            cmd_str = 'java -jar dl4j-word2vec-1.0-SNAPSHOT-jar-with-dependencies.jar' + ' --input ../../../' + str(self.file) + '-split'\
+                + ' --embedding_size ' + str(self.size) \
+                + ' --output ../../../' + str(self.outputpath) + 'dl4j.vec' \
+                + ' --epochs ' + str(self.epochs) \
+                + ' --window_size ' + str(self.window) \
+                + ' --min_count ' + str(self.min_count) \
+                + ' --learning_rate ' + str(self.alpha) \
+                + ' --neg ' + str(self.negative) \
+                + ' --workers ' + str(self.workers) \
+                + ' --subsample ' + str(self.sample) \
+                + ' --batch_size ' + str(self.batch_size)
         print cmd_str
 
         # start timer
@@ -154,6 +163,7 @@ def prepare_dir_files():
     if not os.path.exists(TRAINED_VEC_SAVE_DIR):
         os.makedirs(TRAINED_VEC_SAVE_DIR)
     # Clear old reports
+    # TODO: delete all old .vec files
     if os.path.isfile(TIME_MEM_REPORT_FILENAME):
         os.remove(TIME_MEM_REPORT_FILENAME)
     if os.path.isfile(TIME_MEM_FIG_FILENAME):
