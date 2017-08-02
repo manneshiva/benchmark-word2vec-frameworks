@@ -1,0 +1,105 @@
+---
+# Run this playbook using : `ansible-playbook -i hosts benchmark.yml -vvvv` from inside the ansible directory in repo
+# Play 1 : 
+- name: Fetch and install packages/tools to run Docker 
+  hosts: all
+  gather_facts: False
+  
+  pre_tasks:
+  # Install python - required to run Ansible commands on host machine
+  - name: Install python 2
+    raw: test -e /usr/bin/python || (sudo apt -y update && sudo apt install -y python-minimal)
+
+  - name: Install pip
+    become: true
+    apt: 
+        name: python-pip
+        update_cache: yes 
+        cache_valid_time: 600
+
+  # install docker-py -> leave commented for now, causing error
+  # - name: install docker-py
+  #   become: true
+  #   pip:
+  #       name: docker-py
+  #       version: 1.10.6
+ 
+  # install pycurl - required for installing docker on host machine
+  - name: install pycurl
+    become: true
+    apt: 
+        name: python-pycurl 
+        update_cache: yes 
+        cache_valid_time: 600
+
+# install role using : `ansible-galaxy install -p . angstwad.docker_ubuntu`
+# Play 2 : Install Docker
+- name: Install Docker
+  hosts: all
+  gather_facts: true
+  become: true
+  
+  roles:
+    - role: angstwad.docker_ubuntu
+
+# Play 3 : Clone git repo, pull docker image, run benchmark in docker and mail reports
+- name: Clone git repo, pull docker image, run benchmark in docker and mail reports
+  hosts: all
+  become: true
+  gather_facts: False
+  
+  tasks:
+  - name: Clone benchamrk repo
+    git:
+      repo: https://github.com/manneshiva/benchmark_ml_frameworks.git
+      dest: /home/ubuntu/benchmark_ml_frameworks/
+      clone: yes
+      recursive: yes
+
+  - name: Pull docker image from Docker Hub
+    become: true
+    docker_image:
+      name: manneshiva/playground:benchmarkword2vec-cpu
+
+  - name: Run benchmark inside Docker
+    become: true
+    become_user: root
+    docker_container:
+      name: benchmark
+      image: manneshiva/playground:benchmarkword2vec-cpu
+      privileged: yes
+      tty: yes
+      interactive: yes
+      command: "python benchmark.py --frameworks gensim originalc --file data/text8 --epochs 1 --batch_size 16 --workers 7 --size 10"
+      entrypoint: "/benchmark_ml_frameworks/"
+      volumes: 
+        - "/home/ubuntu/benchmark_ml_frameworks:/benchmark_ml_frameworks/"
+      ports:
+        - "8888:8888"
+
+  # Mailing benchmark report using yahoomail SMTP servers
+  - name: Install sendemail
+    become: true
+    apt:
+        name: sendemail
+        update_cache: yes 
+        cache_valid_time: 600
+
+  # install libnet-ssleay-perl & libio-socket-ssl-perl for TLS support
+  - name: Install libnet-ssleay-perl
+    become: true
+    apt:
+        name: libnet-ssleay-perl
+        update_cache: yes 
+        cache_valid_time: 600
+  - name: Install libio-socket-ssl-perl
+    become: true
+    apt:
+        name: libio-socket-ssl-perl
+        update_cache: yes 
+        cache_valid_time: 600
+
+  # email the benchmark report
+  - name: Mail Benchamrk Report
+    raw: sendemail -f "xxxxxxxxxxx@yahoo.com" -t "xxxxxxxxxxx@yahoo.com" -u "Word2Vec Benchmark Report - {{inventory_hostname}}" -m "Benchmark report attached within this mail." -xu "xxxxxxxxxxx@yahoo.com" -xp "xxxxxxxxxxx" -o tls=yes -s "smtp.mail.yahoo.com:587" -a /home/ubuntu/attach.txt
+
