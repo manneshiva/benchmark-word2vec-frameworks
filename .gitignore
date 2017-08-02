@@ -6,4 +6,5 @@ trainedVectors/*
 !run_benchmark.ipynb
 *.jar
 *.log
+data/text8-split
 
