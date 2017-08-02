@@ -10,6 +10,7 @@ import os
 import gensim
 import memory_profiler
 import time
+import shutil
 from textwrap import wrap
 from numpy import linspace
 import matplotlib
@@ -19,17 +20,9 @@ from subprocess import call, check_output, Popen, STDOUT
 
 
 REPORT_DIR = 'report/'
-TIME_MEM_REPORT_FILENAME = 'report/time&peakmemoryReport.txt'
-TIME_MEM_FIG_FILENAME = 'report/time&peakmemoryFig.jpg'
-EVAL_WORD_VEC_REPORT_FILENAME = 'report/word-pairs-report.txt'
-EVAL_WORD_VEC_FIG_FILENAME = 'report/word-pairs-report-fig.jpg'
 TRAINED_VEC_SAVE_DIR = 'trainedVectors/'
-EVAL_QA_REPORT_FILENAME = 'report/question-answer-report.txt'
-EVAL_QA_FIG_FILENAME = 'report/question-answer-fig.jpg'
 QA_FILE_PATH = 'data/questions-words.txt'
 WORD_PAIRS_DIR = 'data/word-sim/'
-PARAMS_FILENAME = 'report/training-parameters.txt'
-SYSTEM_INFO_FILENAME = 'report/system-info.txt'
 
 REPORT_FILE = 'report/report.txt'
 QA_REPORT = ""
@@ -155,27 +148,21 @@ class Train(object):
 
 def prepare_dir_files():
     """
-    Ensure directories exist and clear old report files/figures.
+    Ensure directories exist and clear old report/trained vectors.
     """
     # Ensure dir exists
     if not os.path.exists(REPORT_DIR):
         os.makedirs(REPORT_DIR)
+    # Clear old contents of directory and create new
+    else:
+        shutil.rmtree(REPORT_DIR)
+        os.makedirs(REPORT_DIR)
+
     if not os.path.exists(TRAINED_VEC_SAVE_DIR):
         os.makedirs(TRAINED_VEC_SAVE_DIR)
-    # Clear old reports
-    # TODO: delete all old .vec files
-    if os.path.isfile(TIME_MEM_REPORT_FILENAME):
-        os.remove(TIME_MEM_REPORT_FILENAME)
-    if os.path.isfile(TIME_MEM_FIG_FILENAME):
-        os.remove(TIME_MEM_FIG_FILENAME)
-    if os.path.isfile(EVAL_WORD_VEC_REPORT_FILENAME):
-        os.remove(EVAL_WORD_VEC_REPORT_FILENAME)
-    if os.path.isfile(EVAL_WORD_VEC_FIG_FILENAME):
-        os.remove(EVAL_WORD_VEC_FIG_FILENAME)
-    if os.path.isfile(EVAL_QA_REPORT_FILENAME):
-        os.remove(EVAL_QA_REPORT_FILENAME)
-    if os.path.isfile(EVAL_QA_FIG_FILENAME):
-        os.remove(EVAL_QA_FIG_FILENAME)
+    else:
+        shutil.rmtree(TRAINED_VEC_SAVE_DIR)
+        os.makedirs(TRAINED_VEC_SAVE_DIR)
 
 
 def get_cpu_info():
