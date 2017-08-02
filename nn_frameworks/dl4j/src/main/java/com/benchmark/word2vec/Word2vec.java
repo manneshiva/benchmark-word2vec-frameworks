@@ -148,7 +148,7 @@ public class Word2vec {
 
         try (OutputStream outVectorPath = new FileOutputStream(outputFilePath, true)) {
 
-            String firstLine = Integer.toString(embedding_size_) + "," + Integer.toString(vec.vocab(). numWords()) + "\n";
+            String firstLine = Integer.toString(vec.vocab(). numWords()) + " " + Integer.toString(embedding_size_) + "\n";
             byte[] bytes = firstLine.getBytes();
             // write a byte sequence
             outVectorPath.write(bytes);
@@ -158,14 +158,6 @@ public class Word2vec {
         } catch (IOException e) {
             e.printStackTrace();
         }
-
-        // Write word vectors to file
-        //WordVectorSerializer.writeWordVectors(vec, outputFilePath);
-
-        // Prints out the closest 10 words to "day". An example on what to do with these Word Vectors.
-        log.info("Closest Words:");
-        Collection<String> lst = vec.wordsNearest("military", 10);
-        System.out.println("10 Words closest to 'military': " + lst);
 
     }
 }
