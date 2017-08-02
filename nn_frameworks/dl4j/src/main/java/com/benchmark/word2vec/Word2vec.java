@@ -1,4 +1,4 @@
-package com.technobium.word2vec;
+package com.benchmark.word2vec;
 import org.datavec.api.util.ClassPathResource;
 import org.deeplearning4j.models.embeddings.loader.WordVectorSerializer;
 import org.deeplearning4j.models.word2vec.Word2Vec;
@@ -73,7 +73,7 @@ public class Word2vec {
         subsample.setRequired(true);
         options.addOption(subsample);
 
-        Option workers = new Option("i", "workers", true, "Use these many worker threads to train the model");
+        Option workers = new Option("th", "workers", true, "Use these many worker threads to train the model");
         workers.setRequired(true);
         options.addOption(workers);
 
@@ -93,15 +93,15 @@ public class Word2vec {
 
         String inputFilePath = cmd.getOptionValue("input");
         String outputFilePath = cmd.getOptionValue("output");
-        int epoch = Integer.parseInt(cmd.getOptionValue("epochs"));
-        int embedding_size = Integer.parseInt(cmd.getOptionValue("embedding_size"));
-        int neg = Integer.parseInt(cmd.getOptionValue("neg"));
-        int batch_size = Integer.parseInt(cmd.getOptionValue("batch_size"));
-        int window_size = Integer.parseInt(cmd.getOptionValue("window_size"));
-        int min_count = Integer.parseInt(cmd.getOptionValue("min_count"));
-        int workers = Integer.parseInt(cmd.getOptionValue("workers"));
-        double subsample = Double.parseDouble(cmd.getOptionValue("subsample"));
-        double learning_rate = Double.parseDouble(cmd.getOptionValue("learning_rate"));
+        int epoch_ = Integer.parseInt(cmd.getOptionValue("epochs"));
+        int embedding_size_ = Integer.parseInt(cmd.getOptionValue("embedding_size"));
+        int neg_ = Integer.parseInt(cmd.getOptionValue("neg"));
+        int batch_size_ = Integer.parseInt(cmd.getOptionValue("batch_size"));
+        int window_size_ = Integer.parseInt(cmd.getOptionValue("window_size"));
+        int min_count_ = Integer.parseInt(cmd.getOptionValue("min_count"));
+        int workers_ = Integer.parseInt(cmd.getOptionValue("workers"));
+        double subsample_ = Double.parseDouble(cmd.getOptionValue("subsample"));
+        double learning_rate_ = Double.parseDouble(cmd.getOptionValue("learning_rate"));
 
         // System.out.println("Epochs : " + epoch);
 
@@ -126,18 +126,18 @@ public class Word2vec {
 
         log.info("Building model....");
         Word2Vec vec = new Word2Vec.Builder()
-                .minWordFrequency(min_count)
-                .batchSize(batch_size)
-                .epochs(epoch)
-                .layerSize(embedding_size)
-                .sampling(subsample)
+                .minWordFrequency(min_count_)
+                .batchSize(batch_size_)
+                .epochs(epoch_)
+                .layerSize(embedding_size_)
+                .sampling(subsample_)
                 .seed(42)
-                .negativeSample(neg)
-                .learningRate(learning_rate)
-                .windowSize(window_size)
+                .negativeSample(neg_)
+                .learningRate(learning_rate_)
+                .windowSize(window_size_)
                 .iterate(iter)
                 .tokenizerFactory(t)
-                .workers(workers)
+                .workers(workers_)
                 .build();
 
         log.info("Fitting Word2Vec model....");
@@ -148,7 +148,7 @@ public class Word2vec {
 
         try (OutputStream outVectorPath = new FileOutputStream(outputFilePath, true)) {
 
-            String firstLine = Integer.toString(100) + "," + Integer.toString(vec.vocab(). numWords()) + "\n";
+            String firstLine = Integer.toString(embedding_size_) + "," + Integer.toString(vec.vocab(). numWords()) + "\n";
             byte[] bytes = firstLine.getBytes();
             // write a byte sequence
             outVectorPath.write(bytes);
