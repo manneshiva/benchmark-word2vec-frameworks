@@ -150,19 +150,14 @@ def prepare_dir_files():
     """
     Ensure directories exist and clear old report/trained vectors.
     """
-    # Ensure dir exists
-    if not os.path.exists(REPORT_DIR):
-        os.makedirs(REPORT_DIR)
-    # Clear old contents of directory and create new
-    else:
+    # Clear old contents of directory (if required) and create new
+    if os.path.exists(REPORT_DIR):
         shutil.rmtree(REPORT_DIR)
-        os.makedirs(REPORT_DIR)
+    os.makedirs(REPORT_DIR)
 
-    if not os.path.exists(TRAINED_VEC_SAVE_DIR):
-        os.makedirs(TRAINED_VEC_SAVE_DIR)
-    else:
+    if os.path.exists(TRAINED_VEC_SAVE_DIR):
         shutil.rmtree(TRAINED_VEC_SAVE_DIR)
-        os.makedirs(TRAINED_VEC_SAVE_DIR)
+    os.makedirs(TRAINED_VEC_SAVE_DIR)
 
 
 def get_cpu_info():
