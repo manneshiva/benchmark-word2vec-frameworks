@@ -5,3 +5,5 @@ trainedVectors/*
 .ipynb_checkpoints
 !run_benchmark.ipynb
 *.jar
+*.log
+
