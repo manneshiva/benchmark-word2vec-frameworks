@@ -34,12 +34,11 @@ class Train(object):
     Class to train various word2vec on various ML frameworks.
 
     """
-    def __init__(self, file, epochs, window, size, batch_size, min_count, alpha, negative, sg, workers, sample, outputpath, reportfile):
+    def __init__(self, file, epochs, window, size, batch_size, min_count, alpha, negative, sg, workers, sample, outputpath):
         if os.path.isfile(file):
             self.file = file
         else:
             sys.exit('Input file does not exist at the path provided.')
-        self.reportfile = reportfile
         self.outputpath = outputpath
         self.epochs = epochs
         self.alpha = float(alpha)
@@ -260,10 +259,9 @@ def prepare_params(options):
     params.pop('frameworks')
     params.pop('log_level')
     params['outputpath'] = TRAINED_VEC_SAVE_DIR
-    params['reportfile'] = REPORT_DIR + params['platform'] + '-report.txt'
-    params.pop('platform')
     global REPORT_FILE
-    REPORT_FILE = params['reportfile']
+    REPORT_FILE = REPORT_DIR + params['platform'] + '-report.txt'
+    params.pop('platform')
     return params
 
 
