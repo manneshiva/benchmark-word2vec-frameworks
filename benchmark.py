@@ -12,11 +12,6 @@ import memory_profiler
 import time
 import shutil
 import json
-from textwrap import wrap
-from numpy import linspace
-import matplotlib
-matplotlib.use('Agg')
-import matplotlib.pyplot as plt
 from subprocess import call, check_output, Popen, STDOUT
 
 
@@ -51,10 +46,10 @@ class Train(object):
 
 
     def train_framework(self, framework, gpu):
-        '''
-        Method to train vectors and save metrics/report one framework at a time
+        """
+        Method to train vectors and save metrics/report one framework at a time.
 
-        '''
+        """
         # construct command and change current working directory according to framework.
         if framework == 'gensim':
             cwd = './nn_frameworks/gensim'
@@ -149,7 +144,7 @@ class Train(object):
         start_time = time.time()
         proc = Popen(cmd_str.split(), stderr=STDOUT, cwd=cwd)
         peak_mem = memory_profiler.memory_usage(proc=proc, multiprocess=True, max_usage=True)
-        #  save time and peak memory to a str
+        #  save time and peak memory
         print REPORT_DICT
         if gpu:
             REPORT_DICT['time'][framework + '-gpu'] = int(time.time() - start_time)
@@ -175,7 +170,7 @@ def clear_trained_vecs():
 
 def get_cpu_info():
     """
-     Get system processor information
+     Get system processor information.
     """
     info = check_output('lscpu', shell=True).strip()
     cpuinfo = [l.split(":") for l in info.split('\n')]
@@ -196,7 +191,7 @@ def get_cpu_info():
 
 def get_gpu_info():
     """
-    Get gpu information
+    Get gpu information.
     """
     gpuinfo = check_output('nvidia-smi -q', shell=True).strip()
     gpuinfo = gpuinfo.replace(':', '\n').split('\n')
@@ -213,9 +208,6 @@ def eval_word_vectors(pathQuestions, pathWordPairs, framework, trainedvectordir)
     """
     Evaluate the trained word vectors.
     """
-    # global QA_REPORT
-    # global WORD_PAIRS_REPORT
-    # load trained vectors
     model = gensim.models.KeyedVectors.load_word2vec_format(trainedvectordir + framework + '.vec')
     #  Evaluate word vectors on question-answer (analogies) task
     acc = model.accuracy(pathQuestions)
@@ -223,10 +215,8 @@ def eval_word_vectors(pathQuestions, pathWordPairs, framework, trainedvectordir)
         num_correct = float(len(section['correct']))
         num_incorrect = float(len(section['incorrect']))
         if(num_correct + num_incorrect) == 0:  # if none of words present in vocab
-            # QA_REPORT += ("%s %s %s\n" % (framework, section['section'], str(0.0)))
             REPORT_DICT['qa'][framework].append((section['section'], str(0.0)))
         else:
-            # QA_REPORT += ("%s %s %s\n" % (framework, section['section'], str(100.0 * (num_correct/(num_correct + num_incorrect)))))
             REPORT_DICT['qa'][framework].append((section['section'], str(100.0 * (num_correct/(num_correct + num_incorrect)))))
     #  Evaluate word vectos on word-pairs task
     for filename in sorted(os.listdir(pathWordPairs)):
@@ -234,14 +224,13 @@ def eval_word_vectors(pathQuestions, pathWordPairs, framework, trainedvectordir)
             rho = model.evaluate_word_pairs(os.path.join(pathWordPairs, filename))[1][0]
         except:
             rho = model.evaluate_word_pairs(os.path.join(pathWordPairs, filename), delimiter= ' ')[1][0]
-        # WORD_PAIRS_REPORT += ("%s %s %s\n" % (framework, filename, rho))
         REPORT_DICT['wordpairs'][framework].append((filename, rho))
 
 
 def parse_args(args):
     parser = argparse.ArgumentParser()
     parser.add_argument('--file', help='Path to text corpus', required=True)
-    parser.add_argument('--frameworks', nargs='*', default=['tensorflow', 'originalc','dl4j','gensim'], choices=['tensorflow', 'originalc', 'dl4j', 'gensim'], help='Specify frameworks to run the benchmarks on(demilited by space). If None provided, benchmarks will be run on all supported frameworks.')
+    parser.add_argument('--frameworks', nargs='*', default=['tensorflow', 'originalc', 'dl4j', 'gensim'], choices=['tensorflow', 'originalc', 'dl4j', 'gensim'], help='Specify frameworks to run the benchmarks on(demilited by space). If None provided, benchmarks will be run on all supported frameworks.')
     parser.add_argument('--epochs', default=5, type=int, help='Number of iterations (epochs) over the corpus. Default : 5')
     parser.add_argument('--size', default=100, type=int, help='Dimensionality of the embeddings/feature vectors. Default : 100')
     parser.add_argument('--window', default=5, type=int, help='Maximum distance between the current and predicted word within a sentence. Default : 5')
@@ -298,13 +287,13 @@ if __name__ == '__main__':
     # write config_str/model parameters to a file - useful for showing training params in the final plots
     REPORT_DICT['trainingparams'] = ', '.join("%s=%r" % (key, val) for (key, val) in vars(options).iteritems())
 
-    # train and evaluate one framework at a time
     REPORT_DICT['frameworks'] = options.frameworks
     REPORT_DICT['time'] = dict()
     REPORT_DICT['memory'] = dict()
     REPORT_DICT['wordpairs'] = dict()
     REPORT_DICT['qa'] = dict()
 
+    # train and evaluate one framework at a time
     for framework in options.frameworks:
         REPORT_DICT['wordpairs'][framework] = []
         REPORT_DICT['qa'][framework] = []
@@ -318,7 +307,7 @@ if __name__ == '__main__':
             print 'Evaluating trained word vectors\' quality for %s-gpu...' % framework
             eval_word_vectors(QA_FILE_PATH, WORD_PAIRS_DIR, framework + '-gpu', TRAINED_VEC_SAVE_DIR)
 
-    # write trained vectors' evaluation to report file
+    # write report as a json string to a file
     with open(REPORT_FILE, 'w+') as f:
         f.write(json.dumps(REPORT_DICT, indent=4))
 
