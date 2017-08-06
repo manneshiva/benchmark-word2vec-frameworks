@@ -11,6 +11,7 @@ import gensim
 import memory_profiler
 import time
 import shutil
+import json
 from textwrap import wrap
 from numpy import linspace
 import matplotlib
@@ -19,15 +20,12 @@ import matplotlib.pyplot as plt
 from subprocess import call, check_output, Popen, STDOUT
 
 
-REPORT_DIR = 'report/'
 TRAINED_VEC_SAVE_DIR = 'trainedVectors/'
 QA_FILE_PATH = 'data/questions-words.txt'
 WORD_PAIRS_DIR = 'data/word-sim/'
-
+REPORT_DICT = dict()
 REPORT_FILE = ''
-QA_REPORT = ""
-WORD_PAIRS_REPORT = ""
-TIME_MEM_REPORT = ""
+
 
 class Train(object):
     """
@@ -152,23 +150,24 @@ class Train(object):
         proc = Popen(cmd_str.split(), stderr=STDOUT, cwd=cwd)
         peak_mem = memory_profiler.memory_usage(proc=proc, multiprocess=True, max_usage=True)
         #  save time and peak memory to a str
-        global TIME_MEM_REPORT
+        print REPORT_DICT
         if gpu:
-            TIME_MEM_REPORT += (framework + '-gpu ' + str(time.time() - start_time) + ' ' + str(peak_mem) + '\n')
+            REPORT_DICT['time'][framework + '-gpu'] = int(time.time() - start_time)
+            REPORT_DICT['memory'][framework + '-gpu'] = int(peak_mem)
         else:
-            TIME_MEM_REPORT += (framework + ' ' + str(time.time() - start_time) + ' ' + str(peak_mem) + '\n')
+            REPORT_DICT['time'][framework] = int(time.time() - start_time)
+            REPORT_DICT['memory'][framework] = int(peak_mem)
+
         return
 
 
-def prepare_dir_files():
+def clear_trained_vecs():
     """
-    Ensure directories exist and clear old report/trained vectors.
+    Ensure directory exist and clear old report/trained vectors.
     """
     # Clear old contents of directory (if required) and create new
-    if os.path.exists(REPORT_DIR):
-        shutil.rmtree(REPORT_DIR)
-    os.makedirs(REPORT_DIR)
-
+    if os.path.exists(REPORT_FILE):
+        os.remove(REPORT_FILE)
     if os.path.exists(TRAINED_VEC_SAVE_DIR):
         shutil.rmtree(TRAINED_VEC_SAVE_DIR)
     os.makedirs(TRAINED_VEC_SAVE_DIR)
@@ -204,7 +203,9 @@ def get_gpu_info():
     gpuinfo = [x.strip() for x in gpuinfo]
     gpuinfo_str = 'GPU INFO\n'
     gpuinfo_str += ('Model Name : ' + gpuinfo[gpuinfo.index('Product Name') + 1] + ', ')
-    gpuinfo_str += ('Total FB Memory : ' + gpuinfo[gpuinfo.index('FB Memory Usage') + 2])
+    gpuinfo_str += ('Total FB Memory : ' + gpuinfo[gpuinfo.index('FB Memory Usage') + 2] + ', ')
+    cuda_version = check_output('cat /usr/local/cuda/version.txt', shell=True).strip()
+    gpuinfo_str += ('CUDA Version : ' + cuda_version)
     return gpuinfo_str
 
 
@@ -212,8 +213,8 @@ def eval_word_vectors(pathQuestions, pathWordPairs, framework, trainedvectordir)
     """
     Evaluate the trained word vectors.
     """
-    global QA_REPORT
-    global WORD_PAIRS_REPORT
+    # global QA_REPORT
+    # global WORD_PAIRS_REPORT
     # load trained vectors
     model = gensim.models.KeyedVectors.load_word2vec_format(trainedvectordir + framework + '.vec')
     #  Evaluate word vectors on question-answer (analogies) task
@@ -222,16 +223,19 @@ def eval_word_vectors(pathQuestions, pathWordPairs, framework, trainedvectordir)
         num_correct = float(len(section['correct']))
         num_incorrect = float(len(section['incorrect']))
         if(num_correct + num_incorrect) == 0:  # if none of words present in vocab
-            QA_REPORT += ("%s %s %s\n" % (framework, section['section'], str(0.0)))
+            # QA_REPORT += ("%s %s %s\n" % (framework, section['section'], str(0.0)))
+            REPORT_DICT['qa'][framework].append((section['section'], str(0.0)))
         else:
-            QA_REPORT += ("%s %s %s\n" % (framework, section['section'], str(100.0 * (num_correct/(num_correct + num_incorrect)))))
+            # QA_REPORT += ("%s %s %s\n" % (framework, section['section'], str(100.0 * (num_correct/(num_correct + num_incorrect)))))
+            REPORT_DICT['qa'][framework].append((section['section'], str(100.0 * (num_correct/(num_correct + num_incorrect)))))
     #  Evaluate word vectos on word-pairs task
     for filename in sorted(os.listdir(pathWordPairs)):
         try:
             rho = model.evaluate_word_pairs(os.path.join(pathWordPairs, filename))[1][0]
         except:
             rho = model.evaluate_word_pairs(os.path.join(pathWordPairs, filename), delimiter= ' ')[1][0]
-        WORD_PAIRS_REPORT += ("%s %s %s\n" % (framework, filename, rho))
+        # WORD_PAIRS_REPORT += ("%s %s %s\n" % (framework, filename, rho))
+        REPORT_DICT['wordpairs'][framework].append((filename, rho))
 
 
 def parse_args(args):
@@ -260,20 +264,9 @@ def prepare_params(options):
     params.pop('log_level')
     params['outputpath'] = TRAINED_VEC_SAVE_DIR
     global REPORT_FILE
-    REPORT_FILE = REPORT_DIR + params['platform'] + '-report.txt'
+    REPORT_FILE = params['platform'] + '-report.json'
     params.pop('platform')
     return params
-
-
-def write_report_file():
-    with open(REPORT_FILE, 'a+') as f:
-        f.write(TIME_MEM_REPORT)
-        f.write("\n")
-        f.write(QA_REPORT)
-        f.write("\n")
-        f.write(WORD_PAIRS_REPORT)
-        f.write("\n")
-        return
 
 
 def check_gpu():
@@ -293,36 +286,41 @@ if __name__ == '__main__':
     # get params required for training
     params = prepare_params(options)
     train = Train(**params)
-    prepare_dir_files()
+    clear_trained_vecs()
 
-    # write system information to a file
-    with open(REPORT_FILE, 'w+') as f:
-            f.write("%s\n" % get_cpu_info())
-            if(not GPU):
-                f.write("\n")
-    # write gpu information to a file, if gpu capability exists
+    # store system information
+    REPORT_DICT['systeminfo'] = get_cpu_info()
+
+    # store gpu information, if gpu capability exists
     if GPU:
-        with open(REPORT_FILE, 'a+') as f:
-                f.write("%s\n" % get_gpu_info())
-                f.write("\n")
+        REPORT_DICT['systeminfo'] += '\n' + get_gpu_info()
+
     # write config_str/model parameters to a file - useful for showing training params in the final plots
-    config_str = ', '.join("%s=%r" % (key, val) for (key, val) in vars(options).iteritems())
-    with open(REPORT_FILE, 'a+') as f:
-            f.write("%s\n" % (config_str))
-            f.write("\n")
+    REPORT_DICT['trainingparams'] = ', '.join("%s=%r" % (key, val) for (key, val) in vars(options).iteritems())
 
     # train and evaluate one framework at a time
+    REPORT_DICT['frameworks'] = options.frameworks
+    REPORT_DICT['time'] = dict()
+    REPORT_DICT['memory'] = dict()
+    REPORT_DICT['wordpairs'] = dict()
+    REPORT_DICT['qa'] = dict()
+
     for framework in options.frameworks:
+        REPORT_DICT['wordpairs'][framework] = []
+        REPORT_DICT['qa'][framework] = []
         train.train_framework(framework, 0)
         print 'Evaluating trained word vectors\' quality for %s...' % framework
+        print REPORT_DICT
         eval_word_vectors(QA_FILE_PATH, WORD_PAIRS_DIR, framework, TRAINED_VEC_SAVE_DIR)
         # train gpu implementation if gpu exists
         if GPU and framework in FRAMEWORKS_GPU:
             train.train_framework(framework, 1)
             print 'Evaluating trained word vectors\' quality for %s-gpu...' % framework
             eval_word_vectors(QA_FILE_PATH, WORD_PAIRS_DIR, framework + '-gpu', TRAINED_VEC_SAVE_DIR)
+
     # write trained vectors' evaluation to report file
-    write_report_file()
+    with open(REPORT_FILE, 'w+') as f:
+        f.write(json.dumps(REPORT_DICT, indent=4))
 
     print 'Trained all frameworks!'
     print 'Reports generated!'
