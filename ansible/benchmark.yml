@@ -1,6 +1,5 @@
 ---
 # Run this playbook using : `ansible-playbook -i hosts benchmark.yml -vvvv` from inside the ansible directory in repo
-# Play 1 : 
 - name: Fetch and install packages/tools to run Docker 
   hosts: all
   gather_facts: False
@@ -74,8 +73,8 @@
   # Clone github repo, pull image from docker, run benchmark in docker and finally mail the report
   - name: Clone benchamrk repo
     git:
-      repo: https://github.com/manneshiva/benchmark_ml_frameworks.git
-      dest: /home/ubuntu/benchmark_ml_frameworks/
+      repo: https://github.com/manneshiva/benchmark-word2vec-frameworks.git
+      dest: /home/ubuntu/benchmark-word2vec-frameworks/
       clone: yes
       recursive: yes
 
@@ -87,8 +86,8 @@
   - name: Run benchamrk inside Docker
     become: true
     command: >
-      sudo docker run --rm -w /benchmark_ml_frameworks/ 
-      -v /home/ubuntu/benchmark_ml_frameworks:/benchmark_ml_frameworks/ 
+      sudo docker run --rm -w /benchmark-word2vec-frameworks/ 
+      -v /home/ubuntu/benchmark-word2vec-frameworks:/benchmark-word2vec-frameworks/ 
       manneshiva/playground:benchmarkword2vec-cpu 
       python benchmark.py --platform aws --frameworks gensim originalc tensorflow dl4j --file data/text8 --epochs 4 --batch_size 16 --workers 7 --size 100
 
@@ -121,4 +120,4 @@
       -m "Benchmark report attached within this mail." -xu "shiva.manne@yahoo.com" -xp "Benchmark@gensim" -o tls=yes 
       -s "smtp.mail.yahoo.com:587" -a ./aws-report.json
     args:
-      chdir: /home/ubuntu/benchmark_ml_frameworks/
+      chdir: /home/ubuntu/benchmark-word2vec-frameworks/
