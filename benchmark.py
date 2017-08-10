@@ -109,35 +109,25 @@ class Train(object):
                     + ' --subsample ' + str(self.sample) \
                     + ' --batch_size ' + str(self.batch_size) \
                     + ' --statistics_interval 5'
-        # TODO :
-        # fix issues while running single line text files
-        # build jars using `mvn package` before running
+
         elif framework == 'dl4j':
+            # build the jar
+            cwd = './nn_frameworks/dl4j'
+            proc = Popen(['mvn', 'package'], stderr=STDOUT, cwd=cwd)
+            proc.communicate()
+            # run jar
             cwd = './nn_frameworks/dl4j/target'
-            if gpu:
-                cmd_str = 'java -jar dl4j-word2vec-gpu-1.0-SNAPSHOT-jar-with-dependencies.jar' + ' --input ../../../' + str(self.file) + '-split'\
-                    + ' --embedding_size ' + str(self.size) \
-                    + ' --output ../../../' + str(self.outputpath) + 'dl4j.vec' \
-                    + ' --epochs ' + str(self.epochs) \
-                    + ' --window_size ' + str(self.window) \
-                    + ' --min_count ' + str(self.min_count) \
-                    + ' --learning_rate ' + str(self.alpha) \
-                    + ' --neg ' + str(self.negative) \
-                    + ' --workers ' + str(self.workers) \
-                    + ' --subsample ' + str(self.sample) \
-                    + ' --batch_size ' + str(self.batch_size)
-            else:
-                cmd_str = 'java -jar dl4j-word2vec-1.0-SNAPSHOT-jar-with-dependencies.jar' + ' --input ../../../' + str(self.file) + '-split'\
-                    + ' --embedding_size ' + str(self.size) \
-                    + ' --output ../../../' + str(self.outputpath) + 'dl4j.vec' \
-                    + ' --epochs ' + str(self.epochs) \
-                    + ' --window_size ' + str(self.window) \
-                    + ' --min_count ' + str(self.min_count) \
-                    + ' --learning_rate ' + str(self.alpha) \
-                    + ' --neg ' + str(self.negative) \
-                    + ' --workers ' + str(self.workers) \
-                    + ' --subsample ' + str(self.sample) \
-                    + ' --batch_size ' + str(self.batch_size)
+            cmd_str = 'java -jar dl4j-word2vec-1.0-SNAPSHOT-jar-with-dependencies.jar' + ' --input ../../../' + str(self.file) + '-split'\
+                + ' --embedding_size ' + str(self.size) \
+                + ' --output ../../../' + str(self.outputpath) + 'dl4j.vec' \
+                + ' --epochs ' + str(self.epochs) \
+                + ' --window_size ' + str(self.window) \
+                + ' --min_count ' + str(self.min_count) \
+                + ' --learning_rate ' + str(self.alpha) \
+                + ' --neg ' + str(self.negative) \
+                + ' --workers ' + str(self.workers) \
+                + ' --subsample ' + str(self.sample) \
+                + ' --batch_size ' + str(self.batch_size)
         print cmd_str
 
         # start timer
@@ -266,7 +256,7 @@ def check_gpu():
         return 0
 
 GPU = check_gpu()  # indicates if gpu capability exists
-FRAMEWORKS_GPU = ['tensorflow', 'dl4j']
+FRAMEWORKS_GPU = ['tensorflow']
 
 
 if __name__ == '__main__':
