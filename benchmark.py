@@ -253,7 +253,7 @@ def prepare_params(options):
 
 def check_gpu():
     try:
-        check_output('which nvcc', shell=True)
+        check_output('nvidia-smi', shell=True)
         return 1
     except:
         return 0
