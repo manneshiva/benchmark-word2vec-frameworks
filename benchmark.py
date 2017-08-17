@@ -67,10 +67,14 @@ class Train(object):
 
         elif framework == 'originalc':
             cwd = './nn_frameworks/originalc'
+            # build executable from .c file
+            proc = Popen('gcc word2vec.c -o word2vec -lm -pthread -Ofast -march=native -Wall -funroll-loops -Wno-unused-result'.split(), stderr=STDOUT, cwd=cwd)
+            proc.communicate()
+            # run executable
             cmd_str = './word2vec' + ' -train ../../' + str(self.file) \
                 + ' -size ' + str(self.size) \
                 + ' -output ../../' + str(self.outputpath) + 'originalc.vec' \
-                + ' --iter ' + str(self.epochs) \
+                + ' -iter ' + str(self.epochs) \
                 + ' -window ' + str(self.window) \
                 + ' -min-count ' + str(self.min_count) \
                 + ' -alpha ' + str(self.alpha) \
@@ -135,7 +139,6 @@ class Train(object):
         proc = Popen(cmd_str.split(), stderr=STDOUT, cwd=cwd)
         peak_mem = memory_profiler.memory_usage(proc=proc, multiprocess=True, max_usage=True)
         #  save time and peak memory
-        print REPORT_DICT
         if gpu:
             REPORT_DICT['time'][framework + '-gpu'] = int(time.time() - start_time)
             REPORT_DICT['memory'][framework + '-gpu'] = int(peak_mem)
@@ -289,7 +292,6 @@ if __name__ == '__main__':
         REPORT_DICT['qa'][framework] = []
         train.train_framework(framework, 0)
         print 'Evaluating trained word vectors\' quality for %s...' % framework
-        print REPORT_DICT
         eval_word_vectors(QA_FILE_PATH, WORD_PAIRS_DIR, framework, TRAINED_VEC_SAVE_DIR)
         # train gpu implementation if gpu exists
         if GPU and framework in FRAMEWORKS_GPU:
