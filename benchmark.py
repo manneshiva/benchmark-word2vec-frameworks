@@ -121,7 +121,7 @@ class Train(object):
             proc.communicate()
             # run jar
             cwd = './nn_frameworks/dl4j/target'
-            cmd_str = 'java -jar dl4j-word2vec-1.0-SNAPSHOT-jar-with-dependencies.jar' + ' --input ../../../' + str(self.file) + '-split'\
+            cmd_str = 'java -jar dl4j-word2vec-1.0-SNAPSHOT-jar-with-dependencies.jar' + ' --input ../../../' + str(self.file) \
                 + ' --embedding_size ' + str(self.size) \
                 + ' --output ../../../' + str(self.outputpath) + 'dl4j.vec' \
                 + ' --epochs ' + str(self.epochs) \
