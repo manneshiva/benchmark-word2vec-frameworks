@@ -32,6 +32,8 @@ if __name__ == '__main__':
     params.pop('outputpath')
     params.pop('file')
     print params
-    sentences = gensim.models.word2vec.Text8Corpus(options.file)
+    # sentences = gensim.models.word2vec.Text8Corpus(options.file)
+    sentences = gensim.models.word2vec.LineSentence(options.file)
+    print sentences
     model = gensim.models.Word2Vec(sentences, **params)
     model.wv.save_word2vec_format(options.outputpath + 'gensim.vec')
