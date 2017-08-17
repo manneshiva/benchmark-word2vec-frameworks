@@ -70,7 +70,7 @@
         name: docker-py
   
   tasks:
-  # Clone github repo, pull image from docker, run benchmark in docker and finally mail the report
+  # Clone github repo, pull image from docker, create wiki corpus, run benchmark in docker and finally mail the report
   - name: Clone benchamrk repo
     git:
       repo: https://github.com/manneshiva/benchmark-word2vec-frameworks.git
@@ -83,13 +83,26 @@
     docker_image:
       name: manneshiva/playground:benchmarkword2vec-cpu
 
+  - name: Download wiki dump
+    get_url:
+      url: https://dumps.wikimedia.org/enwiki/20170801/enwiki-20170801-pages-articles-multistream.xml.bz2
+      dest: /home/ubuntu/benchmark-word2vec-frameworks/data/
+
+  - name: Process wiki dump to create corpus
+    become: true
+    command: >
+      python wiki2corpus.py --wikifile ./data/enwiki-20170801-pages-articles-multistream.xml.bz2 
+      --corpusfile ./data/enwiki.cor --words_per_line 1000 arg1
+    args:
+      chdir: /home/ubuntu/benchmark-word2vec-frameworks/
+
   - name: Run benchamrk inside Docker
     become: true
     command: >
       sudo docker run --rm -w /benchmark-word2vec-frameworks/ 
       -v /home/ubuntu/benchmark-word2vec-frameworks:/benchmark-word2vec-frameworks/ 
       manneshiva/playground:benchmarkword2vec-cpu 
-      python benchmark.py --platform aws --frameworks gensim originalc tensorflow dl4j --file data/text8 --epochs 4 --batch_size 16 --workers 7 --size 100
+      python benchmark.py --platform aws --frameworks gensim originalc tensorflow dl4j --file data/enwiki.cor --epochs 4 --batch_size 16 --workers 7 --size 100
 
   # Mailing benchmark report using yahoomail SMTP servers
   - name: Install sendemail
