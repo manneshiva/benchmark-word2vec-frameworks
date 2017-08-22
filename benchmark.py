@@ -13,6 +13,11 @@ import time
 import shutil
 import json
 from subprocess import call, check_output, Popen, STDOUT
+import logging
+
+
+logging.basicConfig(format='%(asctime)s : %(levelname)s : %(message)s', level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 
 TRAINED_VEC_SAVE_DIR = 'trainedVectors/'
@@ -132,7 +137,7 @@ class Train(object):
                 + ' --workers ' + str(self.workers) \
                 + ' --subsample ' + str(self.sample) \
                 + ' --batch_size ' + str(self.batch_size)
-        print cmd_str
+        logger.info('running command : %s' % cmd_str)
 
         # start timer
         start_time = time.time()
@@ -291,18 +296,18 @@ if __name__ == '__main__':
         REPORT_DICT['wordpairs'][framework] = []
         REPORT_DICT['qa'][framework] = []
         train.train_framework(framework, 0)
-        print 'Evaluating trained word vectors\' quality for %s...' % framework
+        logger.info('Evaluating trained word vectors\' quality for %s...' % framework)
         eval_word_vectors(QA_FILE_PATH, WORD_PAIRS_DIR, framework, TRAINED_VEC_SAVE_DIR)
         # train gpu implementation if gpu exists
         if GPU and framework in FRAMEWORKS_GPU:
             train.train_framework(framework, 1)
-            print 'Evaluating trained word vectors\' quality for %s-gpu...' % framework
+            logger.info('Evaluating trained word vectors\' quality for %s-gpu...' % framework)
             eval_word_vectors(QA_FILE_PATH, WORD_PAIRS_DIR, framework + '-gpu', TRAINED_VEC_SAVE_DIR)
 
     # write report as a json string to a file
     with open(REPORT_FILE, 'w+') as f:
         f.write(json.dumps(REPORT_DICT, indent=4))
 
-    print 'Trained all frameworks!'
-    print 'Reports generated!'
-    print 'Finished running the benchmark!!!'
+    logger.info('Trained all frameworks!')
+    logger.info('Reports generated!')
+    logger.info('Finished running the benchmark!!!')
