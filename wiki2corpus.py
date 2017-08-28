@@ -14,7 +14,8 @@ import logging
 import re
 from gensim import utils
 from gensim.corpora import WikiCorpus
-
+import snowballstemmer
+stemmer = snowballstemmer.stemmer('english')
 
 def lemmatize_wo_tags(
         content, allowed_tags=re.compile('(NN|VB|JJ|RB)'), light=False,
@@ -58,6 +59,7 @@ def lemmatize_wo_tags(
 
 utils.lemmatize = lemmatize_wo_tags
 
+
 def parse_args(args):
     parser = argparse.ArgumentParser()
     parser.add_argument('--wikifile', help='Path to wiki dump xml', required=True)
@@ -70,15 +72,15 @@ if __name__ == '__main__':
     options = parse_args(sys.argv[1:])
     logging.basicConfig(format='%(asctime)s : %(levelname)s : %(message)s', level=logging.INFO)
     i = 0
-    wiki = WikiCorpus(options.wikifile, dictionary={})
+    wiki = WikiCorpus(options.wikifile, lemmatize=False, dictionary={})
     with open(options.corpusfile, 'w') as output:
         for text in wiki.get_texts():
             words = 0
             while words < len(text):
-                output.write(' '.join(text[words:words + options.words_per_line]) + "\n")
+                output.write(' '.join(stemmer.stemWords(text[words:words + options.words_per_line])) + "\n")
                 words += options.words_per_line
             i = i + 1
-            # if(i == 500):
+            # if(i == 2000):
             #     break
             if (i % 10000 == 0):
                 logging.info("Saved " + str(i) + " articles")
