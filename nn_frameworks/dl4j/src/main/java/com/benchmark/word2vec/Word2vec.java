@@ -103,26 +103,11 @@ public class Word2vec {
         double subsample_ = Double.parseDouble(cmd.getOptionValue("subsample"));
         double learning_rate_ = Double.parseDouble(cmd.getOptionValue("learning_rate"));
 
-        // System.out.println("Epochs : " + epoch);
-
-        // System.out.println(inputFilePath);
-        // System.out.println(outputFilePath);
-
-        // FileInputStream fis = new FileInputStream(inputFilePath);
-        // InputStream bis = new BufferedInputStream(fis, 20*10);
-
         log.info("Load & Vectorize Sentences....");
         // Strip white space before and after for each line
         SentenceIterator iter = new BasicLineIterator(inputFilePath);
         // Split on white spaces in the line to get words
         TokenizerFactory t = new DefaultTokenizerFactory();
-
-        /*
-            CommonPreprocessor will apply the following regex to each token: [\d\.:,"'\(\)\[\]|/?!;]+
-            So, effectively all numbers, punctuation symbols and some special symbols are stripped off.
-            Additionally it forces lower case for all tokens.
-         */
-        t.setTokenPreProcessor(new CommonPreprocessor());
 
         log.info("Building model....");
         Word2Vec vec = new Word2Vec.Builder()
