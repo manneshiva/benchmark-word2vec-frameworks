@@ -21,23 +21,29 @@ DL4J | Deeplearning4j is a commercial-grade, open-source, distributed deep-learn
  For the purpose of reproducibilty, the benchmarks need to be run inside a [docker](https://docs.docker.com/).
  - Build your own docker using the `Docker` file provided in the repo. This step assumes you have [installed docker](https://docs.docker.com/engine/installation/linux/ubuntu/#install-using-the-repository). Run the following command inside the repo directory.
  
- `sudo docker build -f Dockerfile-cpu -t benchmark-word2vec-frameworks:cpu .`
+ `sudo docker build -f Dockerfile-cpu -t benchmarkword2vec-cpu .`
  
  - Download the pre-built docker image from Docker's public [registry](https://cloud.docker.com/).
  
- `sudo docker pull [TODO]`
+ `sudo docker pull manneshiva/playground:benchmarkword2vec-gpu`
  
+ [Images on Docker Hub](https://hub.docker.com/r/manneshiva/playground/tags/)
+
  ##### GPU benchmarks
- Exploiting GPU to train word vectors inside docker requires `nvidia-docker`. Requirements, installation guide and why it is necessary can be found [here](https://github.com/NVIDIA/nvidia-docker). Follow the same steps mentioned above replacing `docker` with `nvidia-docker` and `benchmark-word2vec-frameworks:cpu` with `benchmark-word2vec-frameworks:gpu`.
+ Exploiting GPU to train word vectors inside docker requires `nvidia-docker`. Requirements, installation guide and why it is necessary can be found [here](https://github.com/NVIDIA/nvidia-docker). Follow the same steps mentioned above replacing `docker` with `nvidia-docker` and `benchmarkword2vec-cpu` with `benchmarkword2vec-gpu`.
  
- ```sudo nvidia-docker build -f Dockerfile-gpu -t benchmark-word2vec-frameworks:gpu .```
- 
+ ```sudo nvidia-docker build -f Dockerfile-gpu -t benchmarkword2vec-gpu .```
+
+##### Compile tensorflow from source
+Use the `benchmarkword2vec-{c/g}pu-tfsource` Dockerfile to benefit from sse4.2/avx/fma optimizations which results in a faster training time for tensorflow. This may not work on all machines.
  
 **Run the docker image**:
+
+`docker run -v absPathTo/benchmark-word2vec-frameworks/:/benchmark-word2vec-frameworks/ -w /benchmark-word2vec-frameworks/ --rm -it -p 8888:8888 manneshiva/playground:benchmarkword2vec-cpu`
  
- `sudo docker run --rm -it benchmark-word2vec-frameworks:cpu` or
  
- `sudo nvidia-docker run --rm -it benchmark-word2vec-frameworks:gpu`
+ 
+ `nvidia-docker run -v absPathTo/benchmark-word2vec-frameworks/:/benchmark-word2vec-frameworks/ -w /benchmark-word2vec-frameworks/ --rm -it -p 8888:8888 manneshiva/playground:benchmarkword2vec-gpu`
 
  ### Run
  To run all the benchmarks, eg:
@@ -62,24 +68,11 @@ Parameter | Description
 --negative | Number of negative examples; default is 5, common values are 3 - 10 (0 = not used)
 --alpha | The initial learning rate. Default : 0.025
 
-On completion, the reports can be found in `report/` folder.
+On completion, the report can be found in `platform-report.json` file.
 
-To generate graphics from these reports, run:
-
-`python generate_plots.py`
-
-The plots are saved in the `report/` folder
 
 ### Jupyter Notebook
-Assuming you have cloned the repo and are currently in the directory containing this readme file, run the command:
-
-```sudo docker run -v absPathTo/benchmark-word2vec-frameworks/:/benchmark-word2vec-frameworks/ --rm -it -p 8888:8888 benchmark-word2vec-frameworks:cpu ```
-
-Once inside the docker:
-
-```cd benchmark-word2vec-frameworks ```
-
-Fire up the notebook, go to localhost:8888 and open run_benchmark.ipynb
+To generate graphics from the report,fire up the notebook, go to localhost:8888 and open visualize_report.ipynb
 
 ```jupyter notebook --allow-root ```
 
