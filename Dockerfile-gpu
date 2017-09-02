@@ -2,6 +2,8 @@
 # Pinned image version using it's digest
 FROM tensorflow/tensorflow:latest-gpu@sha256:807a3eaa544c49f9905cd9b5df50ee7463364f1f340ae665e70d49b3cd628fe4
 
+MAINTAINER Shiva Manne <manneshiva@gmail.com>
+
 WORKDIR "/"
 
 #setting up Java & Maven for dl4j
@@ -25,8 +27,8 @@ RUN pip --no-cache-dir install \
         gensim==2.1.0 \
         memory_profiler==0.47 \
         psutil==5.2.2 \
-        plotly==2.0.13
+        snowballstemmer==1.2.1 \
+        PyStemmer==1.3.0
 
 # Run bash when the container launches
 CMD /bin/bash
-
