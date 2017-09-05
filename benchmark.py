@@ -58,9 +58,6 @@ class Train(object):
 
         elif framework == 'originalc':
             cwd = '{}{}'.format(os.getcwd(), '/nn_frameworks/originalc')
-            # build executable from .c file
-            proc = Popen('gcc word2vec.c -o word2vec -lm -pthread -Ofast -march=native -Wall -funroll-loops -Wno-unused-result'.split(), stderr=STDOUT, cwd=cwd)
-            proc.communicate()
             # run executable
             cmd_str = './word2vec -train {} -size {} -output {} -iter {}' \
             ' -window {} -min-count {} -alpha {} -negative {} -cbow {} -threads' \
@@ -70,13 +67,7 @@ class Train(object):
                 self.negative, not self.sg, self.workers, self.sample)
 
         elif framework == 'tensorflow':
-            # compile ops
             cwd = '{}{}'.format(os.getcwd(), '/nn_frameworks/tensorflow')
-            cmd_str1 = 'TF_INC=$(python -c "import tensorflow as tf; print(tf.sysconfig.get_include())")'
-            cmd_str2 = 'g++ -std=c++11 -shared word2vec_ops.cc word2vec_kernels.cc -o word2vec_ops.so -fPIC -I $TF_INC -O2 -D_GLIBCXX_USE_CXX11_ABI=0'
-            proc = Popen('{} && {}'.format(cmd_str1, cmd_str2), stderr=STDOUT, cwd=cwd, shell=True, universal_newlines=True)
-            proc.communicate()
-
             if gpu:
                 cmd_str = 'python word2vec.py --train_data {}' \
                 ' --embedding_size {} --save_path_wordvectors {}' \
@@ -97,10 +88,6 @@ class Train(object):
                 self.negative, self.workers, self.sample, self.batch_size)
 
         elif framework == 'dl4j':
-            # build the jar
-            cwd = '{}{}'.format(os.getcwd(), '/nn_frameworks/dl4j')
-            proc = Popen(['mvn', 'package'], stderr=STDOUT, cwd=cwd)
-            proc.communicate()
             # run jar
             cwd = './nn_frameworks/dl4j/target'
             cmd_str = 'java -jar dl4j-word2vec-1.0-SNAPSHOT-jar-with-dependencies.jar' \

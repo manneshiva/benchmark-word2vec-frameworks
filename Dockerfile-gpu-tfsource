@@ -1,4 +1,4 @@
-FROM ubuntu:16.04@sha256:34471448724419596ca4e890496d375801de21b0e67b81a77fd6155ce001edad
+FROM nvidia/cuda:8.0-cudnn6-devel-ubuntu16.04@sha256:238cc73e12c381e1469815f7ee149028a2ee3d557b68ff9b12d907c2d3ea3c04
 
 MAINTAINER Shiva Manne <manneshiva@gmail.com>
 
@@ -116,4 +116,20 @@ RUN pip --no-cache-dir install \
         snowballstemmer==1.2.1 \
         PyStemmer==1.3.0
 
+COPY ./benchmark-word2vec-frameworks /benchmark-word2vec-frameworks
+
+# build executable from .c file for orginalc code
+WORKDIR /benchmark-word2vec-frameworks/nn_frameworks/originalc
+RUN gcc word2vec.c -o word2vec -lm -pthread -Ofast -march=native -Wall -funroll-loops -Wno-unused-result
+
+# compile tensorflow ops
+WORKDIR /benchmark-word2vec-frameworks/nn_frameworks/tensorflow
+RUN TF_INC=/usr/local/lib/python2.7/dist-packages/tensorflow/include && \
+    g++ -std=c++11 -shared word2vec_ops.cc word2vec_kernels.cc -o word2vec_ops.so -fPIC -I $TF_INC -O2 -D_GLIBCXX_USE_CXX11_ABI=0
+
+# build the runnable dl4j jar
+WORKDIR /benchmark-word2vec-frameworks/nn_frameworks/dl4j
+RUN mvn package
+
+WORKDIR /
 CMD ["/bin/bash"]
