@@ -157,10 +157,10 @@ def get_gpu_info():
     gpuinfo = gpuinfo.replace(':', '\n').split('\n')
     gpuinfo = [x.strip() for x in gpuinfo]
     gpuinfo_str = 'GPU INFO\n'
-    gpuinfo_str += ('Model Name : ' + gpuinfo[gpuinfo.index('Product Name') + 1] + ', ')
-    gpuinfo_str += ('Total FB Memory : ' + gpuinfo[gpuinfo.index('FB Memory Usage') + 2] + ', ')
+    gpuinfo_str += 'Model Name : {}, '.format(gpuinfo[gpuinfo.index('Product Name') + 1])
+    gpuinfo_str += 'Total FB Memory : {}, '.format(gpuinfo[gpuinfo.index('FB Memory Usage') + 2])
     cuda_version = check_output('cat /usr/local/cuda/version.txt', shell=True).strip()
-    gpuinfo_str += ('CUDA Version : ' + cuda_version)
+    gpuinfo_str += 'CUDA Version : {}'.format(cuda_version)
     return gpuinfo_str
 
 
@@ -247,7 +247,7 @@ if __name__ == '__main__':
 
     # store gpu information, if gpu capability exists
     if GPU:
-        REPORT_DICT['systeminfo'] += '\n' + get_gpu_info()
+        REPORT_DICT['systeminfo'] += '\n{}'.format(get_gpu_info())
 
     # write config_str/model parameters to a file - useful for showing training params in the final plots
     REPORT_DICT['trainingparams'] = vars(options)
