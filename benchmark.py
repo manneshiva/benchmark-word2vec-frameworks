@@ -269,6 +269,10 @@ if __name__ == '__main__':
         REPORT_DICT = train.train_framework(framework, 0, REPORT_DICT)
         logger.info('Evaluating trained word vectors\' quality for %s...' % framework)
         REPORT_DICT = eval_word_vectors(QA_FILE_PATH, WORD_PAIRS_DIR, framework, TRAINED_VEC_SAVE_DIR, REPORT_DICT)
+        # write report as a json string to a file
+        # save after every framework to keep results in case code breaks
+        with open(REPORT_FILE, 'w') as f:
+            f.write(json.dumps(REPORT_DICT, indent=4))
         # train gpu implementation if gpu exists
         if GPU and framework in FRAMEWORKS_GPU:
             REPORT_DICT['wordpairs']['{}-gpu'.format(framework)] = []
@@ -276,10 +280,8 @@ if __name__ == '__main__':
             REPORT_DICT = train.train_framework(framework, 1, REPORT_DICT)
             logger.info('Evaluating trained word vectors\' quality for %s-gpu...' % framework)
             REPORT_DICT = eval_word_vectors(QA_FILE_PATH, WORD_PAIRS_DIR, '{}-gpu'.format(framework), TRAINED_VEC_SAVE_DIR, REPORT_DICT)
-        # write report as a json string to a file
-        # save after every framework to keep results in case code breaks
-        with open(REPORT_FILE, 'w') as f:
-            f.write(json.dumps(REPORT_DICT, indent=4))
+            with open(REPORT_FILE, 'w') as f:
+                f.write(json.dumps(REPORT_DICT, indent=4))
 
     logger.info('Trained all frameworks!')
     logger.info('Reports generated!')
