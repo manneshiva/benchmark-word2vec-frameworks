@@ -117,6 +117,7 @@ public class Word2vec {
                 .layerSize(embedding_size_)
                 .sampling(subsample_)
                 .seed(42)
+                .useHierarchicSoftmax(false)
                 .negativeSample(neg_)
                 .learningRate(learning_rate_)
                 .windowSize(window_size_)
