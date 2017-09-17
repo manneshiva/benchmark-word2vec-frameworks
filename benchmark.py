@@ -4,7 +4,6 @@
 # Author: Shiva Manne <manneshiva@gmail.com>
 
 import argparse
-import sys
 import os
 import gensim
 import memory_profiler
@@ -24,11 +23,12 @@ class Train(object):
     Class to train various word2vec on various ML frameworks.
 
     """
-    def __init__(self, fname, epochs, window, size, batch_size, min_count, alpha, negative, sg, workers, sample, outputpath):
+    def __init__(self, fname, epochs, window, size, batch_size, min_count,
+                 alpha, negative, sg, workers, sample, outputpath):
         if os.path.isfile(fname):
             self.fname = fname
         else:
-            sys.exit('Input file does not exist at the path provided.')
+            raise RuntimeError('Input file does not exist at the path provided.')
         self.outputpath = outputpath
         self.epochs = epochs
         self.alpha = alpha
@@ -47,71 +47,88 @@ class Train(object):
 
         """
         # construct command and change current working directory according to framework.
+
+        cmd_str, cwd = '', ''
         if framework == 'gensim':
             cwd = '{}{}'.format(os.getcwd(), '/nn_frameworks/gensim')
-            cmd_str = 'python gensim_word2vec.py --file {} --size {} --outputpath {}' \
-            ' --iter {} --window {} --min_count {} --alpha {} --negative {}' \
-            ' --sg {} --workers {} --sample {}' \
-            .format(self.fname, self.size, self.outputpath, self.epochs,
-                self.window, self.min_count, self.alpha, self.negative,
-                self.sg, self.workers, self.sample)
+            cmd_str = \
+                'python gensim_word2vec.py --file {} --size {} --outputpath {}' \
+                ' --iter {} --window {} --min_count {} --alpha {} --negative {}' \
+                ' --sg {} --workers {} --sample {}' \
+                .format(
+                    self.fname, self.size, self.outputpath, self.epochs,
+                    self.window, self.min_count, self.alpha, self.negative,
+                    self.sg, self.workers, self.sample
+                )
 
         elif framework == 'originalc':
             cwd = '{}{}'.format(os.getcwd(), '/nn_frameworks/originalc')
             # run executable
-            cmd_str = './word2vec -train {} -size {} -output {} -iter {}' \
-            ' -window {} -min-count {} -alpha {} -negative {} -cbow {} -threads' \
-            ' {} -sample {} -binary 0' \
-            .format(self.fname, self.size, self.outputpath + 'originalc.vec',
-                self.epochs, self.window, self.min_count, self.alpha,
-                self.negative, not self.sg, self.workers, self.sample)
+            cmd_str = \
+                './word2vec -train {} -size {} -output {} -iter {}' \
+                ' -window {} -min-count {} -alpha {} -negative {} -cbow {} -threads' \
+                ' {} -sample {} -binary 0' \
+                .format(
+                    self.fname, self.size, self.outputpath + 'originalc.vec',
+                    self.epochs, self.window, self.min_count, self.alpha,
+                    self.negative, not self.sg, self.workers, self.sample
+                )
 
         elif framework == 'tensorflow':
             cwd = '{}{}'.format(os.getcwd(), '/nn_frameworks/tensorflow')
             if gpu:
-                cmd_str = 'python word2vec.py --train_data {}' \
-                ' --embedding_size {} --save_path_wordvectors {}' \
-                ' --epochs_to_train {} --window_size {} --min_count {}' \
-                ' --learning_rate {} --num_neg_samples {} --concurrent_steps {}' \
-                ' --subsample {} --batch_size {} --statistics_interval 5 --gpu 1' \
-                .format(self.fname, self.size, self.outputpath + 'tensorflow-gpu.vec',
-                self.epochs, self.window, self.min_count, self.alpha,
-                self.negative, self.workers, self.sample, self.batch_size)
+                cmd_str = \
+                    'python word2vec.py --train_data {}' \
+                    ' --embedding_size {} --save_path_wordvectors {}' \
+                    ' --epochs_to_train {} --window_size {} --min_count {}' \
+                    ' --learning_rate {} --num_neg_samples {} --concurrent_steps {}' \
+                    ' --subsample {} --batch_size {} --statistics_interval 5 --gpu 1' \
+                    .format(
+                        self.fname, self.size, self.outputpath + 'tensorflow-gpu.vec',
+                        self.epochs, self.window, self.min_count, self.alpha,
+                        self.negative, self.workers, self.sample, self.batch_size
+                    )
             else:
-                cmd_str = 'python word2vec.py --train_data {}' \
-                ' --embedding_size {} --save_path_wordvectors {}' \
-                ' --epochs_to_train {} --window_size {} --min_count {}' \
-                ' --learning_rate {} --num_neg_samples {} --concurrent_steps {}' \
-                ' --subsample {} --batch_size {} --statistics_interval 5' \
-                .format(self.fname, self.size, self.outputpath + 'tensorflow.vec',
-                self.epochs, self.window, self.min_count, self.alpha,
-                self.negative, self.workers, self.sample, self.batch_size)
+                cmd_str = \
+                    'python word2vec.py --train_data {}' \
+                    ' --embedding_size {} --save_path_wordvectors {}' \
+                    ' --epochs_to_train {} --window_size {} --min_count {}' \
+                    ' --learning_rate {} --num_neg_samples {} --concurrent_steps {}' \
+                    ' --subsample {} --batch_size {} --statistics_interval 5' \
+                    .format(
+                        self.fname, self.size, self.outputpath + 'tensorflow.vec',
+                        self.epochs, self.window, self.min_count, self.alpha,
+                        self.negative, self.workers, self.sample, self.batch_size
+                    )
 
         elif framework == 'dl4j':
             # run jar
             cwd = './nn_frameworks/dl4j/target'
-            cmd_str = 'java -jar dl4j-word2vec-1.0-SNAPSHOT-jar-with-dependencies.jar' \
-            ' --input {} --embedding_size {} --output {} --epochs {}' \
-            ' --window_size {} --min_count {} --learning_rate {} --neg {}' \
-            ' --workers {} --subsample {} --batch_size {}' \
-            .format(self.fname, self.size, self.outputpath + 'dl4j.vec',
-            self.epochs, self.window, self.min_count, self.alpha,
-            self.negative, self.workers, self.sample, self.batch_size)
+            cmd_str = \
+                'java -jar dl4j-word2vec-1.0-SNAPSHOT-jar-with-dependencies.jar' \
+                ' --input {} --embedding_size {} --output {} --epochs {}' \
+                ' --window_size {} --min_count {} --learning_rate {} --neg {}' \
+                ' --workers {} --subsample {} --batch_size {}' \
+                .format(
+                    self.fname, self.size, self.outputpath + 'dl4j.vec',
+                    self.epochs, self.window, self.min_count, self.alpha,
+                    self.negative, self.workers, self.sample, self.batch_size
+                )
 
         logger.info('running command : %s' % cmd_str)
         # start timer
         start_time = time.time()
         proc = Popen(cmd_str.split(), stderr=STDOUT, cwd=cwd)
         peak_mem = memory_profiler.memory_usage(proc=proc, multiprocess=True, max_usage=True)
+        end_time = time.time()
         #  save time and peak memory
+
         if gpu:
-            report_dict['time']['{}-gpu'.format(framework)] = int(time.time() - start_time)
-            report_dict['memory']['{}-gpu'.format(framework)] = int(peak_mem)
-            report_dict['command']['{}-gpu'.format(framework)] = cmd_str
-        else:
-            report_dict['time'][framework] = int(time.time() - start_time)
-            report_dict['memory'][framework] = int(peak_mem)
-            report_dict['command'][framework] = cmd_str
+            framework = '{}-gpu'.format(framework)
+
+        report_dict['time'][framework] = int(end_time - start_time)
+        report_dict['memory'][framework] = int(peak_mem)
+        report_dict['command'][framework] = cmd_str
 
         return report_dict
 
@@ -132,13 +149,14 @@ def get_cpu_info():
     """
      Get system processor information.
     """
-    info = check_output('lscpu', shell=True).strip()
-    cpuinfo = [l.split(":") for l in info.split('\n')]
+    info = check_output('lscpu', shell=True).strip().split('\n')
+    cpuinfo = [l.split(":") for l in info]
     cpuinfo = [(t[0], t[1].strip()) for t in cpuinfo]
     cpuinfo = dict(cpuinfo)
+
     # get system memory information
-    info = check_output('cat /proc/meminfo', shell=True).strip()
-    meminfo = [l.split(":") for l in info.split('\n')]
+    info = check_output('cat /proc/meminfo', shell=True).split('\n')
+    meminfo = [l.split(":") for l in info]
     meminfo = [(t[0], t[1].strip()) for t in meminfo]
     cpuinfo.update(dict(meminfo))
 
@@ -164,26 +182,29 @@ def get_gpu_info():
     return gpuinfo_str
 
 
-def eval_word_vectors(pathQuestions, pathWordPairs, framework, trainedvectordir, report_dict):
+def eval_word_vectors(path_questions, path_word_pairs, framework, trained_vector_dir, report_dict):
     """
     Evaluate the trained word vectors.
     """
-    model = gensim.models.KeyedVectors.load_word2vec_format(trainedvectordir + framework + '.vec')
+    model = gensim.models.KeyedVectors.load_word2vec_format(trained_vector_dir + framework + '.vec')
     #  Evaluate word vectors on question-answer (analogies) task
-    acc = model.accuracy(pathQuestions)
+    acc = model.accuracy(path_questions)
     for section in acc:
         num_correct = float(len(section['correct']))
         num_incorrect = float(len(section['incorrect']))
-        if(num_correct + num_incorrect) == 0:  # if none of words present in vocab
+        if (num_correct + num_incorrect) == 0:  # if none of words present in vocab
             report_dict['qa'][framework].append((section['section'], str(0.0)))
         else:
-            report_dict['qa'][framework].append((section['section'], str(100.0 * (num_correct/(num_correct + num_incorrect)))))
-    #  Evaluate word vectos on word-pairs task
-    for filename in sorted(os.listdir(pathWordPairs)):
+            report_dict['qa'][framework].append(
+                (section['section'], str(100.0 * (num_correct/(num_correct + num_incorrect))))
+            )
+
+    #  Evaluate word vectors on word-pairs task
+    for filename in sorted(os.listdir(path_word_pairs)):
         try:
-            rho = model.evaluate_word_pairs(os.path.join(pathWordPairs, filename))[1][0]
+            rho = model.evaluate_word_pairs(os.path.join(path_word_pairs, filename))[1][0]
         except:
-            rho = model.evaluate_word_pairs(os.path.join(pathWordPairs, filename), delimiter= ' ')[1][0]
+            rho = model.evaluate_word_pairs(os.path.join(path_word_pairs, filename), delimiter=' ')[1][0]
         report_dict['wordpairs'][framework].append((filename, rho))
 
     return report_dict
@@ -192,19 +213,56 @@ def eval_word_vectors(pathQuestions, pathWordPairs, framework, trainedvectordir,
 def parse_args():
     parser = argparse.ArgumentParser()
     parser.add_argument('--fname', help='Path to text corpus', required=True)
-    parser.add_argument('--frameworks', nargs='*', default=['tensorflow', 'originalc', 'dl4j', 'gensim'], choices=['tensorflow', 'originalc', 'dl4j', 'gensim'], help='Specify frameworks to run the benchmarks on(demilited by space). If None provided, benchmarks will be run on all supported frameworks.')
-    parser.add_argument('--epochs', default=5, type=int, help='Number of iterations (epochs) over the corpus. Default : %(default)s')
-    parser.add_argument('--size', default=100, type=int, help='Dimensionality of the embeddings/feature vectors. Default : %(default)s')
-    parser.add_argument('--window', default=5, type=int, help='Maximum distance between the current and predicted word within a sentence. Default : %(default)s')
-    parser.add_argument('--min_count', default=5, type=int, help='This will discard words that appear less than MIN_COUNT times. Default : %(default)s')
-    parser.add_argument('--workers', default=3, type=int, help='Use these many worker threads to train the model. Default : %(default)s')
-    parser.add_argument('--sample', default=1e-3, type=float, help='Set threshold for occurrence of words. Those that appear with higher frequency \
-        in the training data will be randomly down-sampled; default is %(default)s, useful range is (0, 1e-5)')
-    parser.add_argument('--sg', default=1, choices=[0, 1], type=int, help='Use the skip-gram model; default is %(default)s (use 0 for continuous bag of words model)')
-    parser.add_argument('--negative', default=5, type=int, help='Number of negative examples; default is %(default)s, common values are 3 - 10 (0 = not used)')
-    parser.add_argument('--batch_size', default=32, type=int, help='Mini batch size for training. Default : %(default)s')
-    parser.add_argument('--alpha', default=0.025, type=float, help='The initial learning rate. Default : %(default)s')
-    parser.add_argument('--platform', help='Platform the benchmark is being run on. eg. aws, azure', required=True)
+    parser.add_argument(
+        '--frameworks', nargs='*', default=['tensorflow', 'originalc', 'dl4j', 'gensim'],
+        choices=['tensorflow', 'originalc', 'dl4j', 'gensim'],
+        help='Specify frameworks to run the benchmarks on(demilited by space). '
+        'If None provided, benchmarks will be run on all supported frameworks.'
+    )
+    parser.add_argument(
+        '--epochs', default=5, type=int,
+        help='Number of iterations (epochs) over the corpus. Default : %(default)s'
+    )
+    parser.add_argument(
+        '--size', default=100, type=int,
+        help='Dimensionality of the embeddings/feature vectors. Default : %(default)s'
+    )
+    parser.add_argument(
+        '--window', default=5, type=int,
+        help='Maximum distance between the current and predicted word within a sentence. Default : %(default)s'
+    )
+    parser.add_argument(
+        '--min_count', default=5, type=int,
+        help='This will discard words that appear less than MIN_COUNT times. Default : %(default)s'
+    )
+    parser.add_argument(
+        '--workers', default=3, type=int,
+        help='Use these many worker threads to train the model. Default : %(default)s'
+    )
+    parser.add_argument(
+        '--sample', default=1e-3, type=float,
+        help='Set threshold for occurrence of words. Those that appear with higher frequency '
+        'in the training data will be randomly down-sampled; default is %(default)s, useful range is (0, 1e-5)'
+    )
+    parser.add_argument(
+        '--sg', default=1, choices=[0, 1], type=int,
+        help='Use the skip-gram model; default is %(default)s (use 0 for continuous bag of words model)'
+    )
+    parser.add_argument(
+        '--negative', default=5, type=int,
+        help='Number of negative examples; default is %(default)s, common values are 3 - 10 (0 = not used)'
+    )
+    parser.add_argument(
+        '--batch_size', default=32, type=int,
+        help='Mini batch size for training. Default : %(default)s'
+    )
+    parser.add_argument(
+        '--alpha', default=0.025, type=float,
+        help='The initial learning rate. Default : %(default)s'
+    )
+    parser.add_argument(
+        '--platform', help='Platform the benchmark is being run on. eg. aws, azure', required=True
+    )
     return parser.parse_args()
 
 
@@ -227,8 +285,8 @@ def check_gpu():
 if __name__ == '__main__':
 
     options = parse_args()
+    report_dict = dict()
 
-    REPORT_DICT = dict()
     TRAINED_VEC_SAVE_DIR = 'trainedVectors/'
     QA_FILE_PATH = 'data/questions-words.txt'
     WORD_PAIRS_DIR = 'data/word-sim/'
@@ -243,45 +301,47 @@ if __name__ == '__main__':
     clear_trained_vecs(REPORT_FILE, TRAINED_VEC_SAVE_DIR)
 
     # store system information
-    REPORT_DICT['systeminfo'] = get_cpu_info()
+    report_dict['systeminfo'] = get_cpu_info()
 
     # store gpu information, if gpu capability exists
     if GPU:
-        REPORT_DICT['systeminfo'] += '\n{}'.format(get_gpu_info())
+        report_dict['systeminfo'] += '\n{}'.format(get_gpu_info())
 
     # write config_str/model parameters to a file - useful for showing training params in the final plots
-    REPORT_DICT['trainingparams'] = vars(options)
+    report_dict['trainingparams'] = vars(options)
     if GPU and 'tensorflow' in options.frameworks:
-        REPORT_DICT['frameworks'] = options.frameworks + ['tensorflow-gpu']
+        report_dict['frameworks'] = options.frameworks + ['tensorflow-gpu']
     else:
-        REPORT_DICT['frameworks'] = options.frameworks
-    REPORT_DICT['platform'] = options.platform
-    REPORT_DICT['time'] = dict()
-    REPORT_DICT['memory'] = dict()
-    REPORT_DICT['command'] = dict()
-    REPORT_DICT['wordpairs'] = dict()
-    REPORT_DICT['qa'] = dict()
+        report_dict['frameworks'] = options.frameworks
+    report_dict['platform'] = options.platform
+    report_dict['time'] = dict()
+    report_dict['memory'] = dict()
+    report_dict['command'] = dict()
+    report_dict['wordpairs'] = dict()
+    report_dict['qa'] = dict()
 
     # train and evaluate one framework at a time
     for framework in options.frameworks:
-        REPORT_DICT['wordpairs'][framework] = []
-        REPORT_DICT['qa'][framework] = []
-        REPORT_DICT = train.train_framework(framework, 0, REPORT_DICT)
+        report_dict['wordpairs'][framework] = []
+        report_dict['qa'][framework] = []
+        report_dict = train.train_framework(framework, 0, report_dict)
         logger.info('Evaluating trained word vectors\' quality for %s...' % framework)
-        REPORT_DICT = eval_word_vectors(QA_FILE_PATH, WORD_PAIRS_DIR, framework, TRAINED_VEC_SAVE_DIR, REPORT_DICT)
+        report_dict = eval_word_vectors(QA_FILE_PATH, WORD_PAIRS_DIR, framework, TRAINED_VEC_SAVE_DIR, report_dict)
         # write report as a json string to a file
         # save after every framework to keep results in case code breaks
         with open(REPORT_FILE, 'w') as f:
-            f.write(json.dumps(REPORT_DICT, indent=4))
+            f.write(json.dumps(report_dict, indent=4))
         # train gpu implementation if gpu exists
         if GPU and framework in FRAMEWORKS_GPU:
-            REPORT_DICT['wordpairs']['{}-gpu'.format(framework)] = []
-            REPORT_DICT['qa']['{}-gpu'.format(framework)] = []
-            REPORT_DICT = train.train_framework(framework, 1, REPORT_DICT)
+            report_dict['wordpairs']['{}-gpu'.format(framework)] = []
+            report_dict['qa']['{}-gpu'.format(framework)] = []
+            report_dict = train.train_framework(framework, 1, report_dict)
             logger.info('Evaluating trained word vectors\' quality for %s-gpu...' % framework)
-            REPORT_DICT = eval_word_vectors(QA_FILE_PATH, WORD_PAIRS_DIR, '{}-gpu'.format(framework), TRAINED_VEC_SAVE_DIR, REPORT_DICT)
+            report_dict = eval_word_vectors(
+                QA_FILE_PATH, WORD_PAIRS_DIR, '{}-gpu'.format(framework), TRAINED_VEC_SAVE_DIR, report_dict
+            )
             with open(REPORT_FILE, 'w') as f:
-                f.write(json.dumps(REPORT_DICT, indent=4))
+                f.write(json.dumps(report_dict, indent=4))
 
     logger.info('Trained all frameworks!')
     logger.info('Reports generated!')
