@@ -12,6 +12,7 @@ import shutil
 import json
 from subprocess import check_output, Popen, STDOUT
 import logging
+import collections
 
 
 logging.basicConfig(format='%(asctime)s : %(levelname)s : %(message)s', level=logging.INFO)
@@ -41,13 +42,14 @@ class Train(object):
         self.workers = workers
         self.sample = sample
 
-    def train_framework(self, framework, gpu, report_dict):
+    def train_framework(self, framework, gpu):
         """
         Method to train vectors and save metrics/report one framework at a time.
 
         """
         # construct command and change current working directory according to framework.
 
+        train_dict = dict()
         cmd_str, cwd = '', ''
         if framework == 'gensim':
             cwd = '{}{}'.format(os.getcwd(), '/nn_frameworks/gensim')
@@ -126,11 +128,14 @@ class Train(object):
         if gpu:
             framework = '{}-gpu'.format(framework)
 
-        report_dict['time'][framework] = int(end_time - start_time)
-        report_dict['memory'][framework] = int(peak_mem)
-        report_dict['command'][framework] = cmd_str
+        train_dict['time'] = dict()
+        train_dict['memory'] = dict()
+        train_dict['command'] = dict()
+        train_dict['time'][framework] = int(end_time - start_time)
+        train_dict['memory'][framework] = int(peak_mem)
+        train_dict['command'][framework] = cmd_str
 
-        return report_dict
+        return train_dict
 
 
 def clear_trained_vecs(report_dict, trained_vec_save_dir):
@@ -155,7 +160,7 @@ def get_cpu_info():
     cpuinfo = dict(cpuinfo)
 
     # get system memory information
-    info = check_output('cat /proc/meminfo', shell=True).split('\n')
+    info = check_output('cat /proc/meminfo', shell=True).strip().split('\n')
     meminfo = [l.split(":") for l in info]
     meminfo = [(t[0], t[1].strip()) for t in meminfo]
     cpuinfo.update(dict(meminfo))
@@ -182,10 +187,16 @@ def get_gpu_info():
     return gpuinfo_str
 
 
-def eval_word_vectors(path_questions, path_word_pairs, framework, trained_vector_dir, report_dict):
+def eval_word_vectors(path_questions, path_word_pairs, framework, trained_vector_dir):
     """
     Evaluate the trained word vectors.
     """
+    eval_dict = dict()
+    eval_dict['qa'] = dict()
+    eval_dict['wordpairs'] = dict()
+    eval_dict['qa'][framework] = []
+    eval_dict['wordpairs'][framework] = []
+
     model = gensim.models.KeyedVectors.load_word2vec_format(trained_vector_dir + framework + '.vec')
     #  Evaluate word vectors on question-answer (analogies) task
     acc = model.accuracy(path_questions)
@@ -193,9 +204,9 @@ def eval_word_vectors(path_questions, path_word_pairs, framework, trained_vector
         num_correct = float(len(section['correct']))
         num_incorrect = float(len(section['incorrect']))
         if (num_correct + num_incorrect) == 0:  # if none of words present in vocab
-            report_dict['qa'][framework].append((section['section'], str(0.0)))
+            eval_dict['qa'][framework].append((section['section'], str(0.0)))
         else:
-            report_dict['qa'][framework].append(
+            eval_dict['qa'][framework].append(
                 (section['section'], str(100.0 * (num_correct/(num_correct + num_incorrect))))
             )
 
@@ -205,9 +216,9 @@ def eval_word_vectors(path_questions, path_word_pairs, framework, trained_vector
             rho = model.evaluate_word_pairs(os.path.join(path_word_pairs, filename))[1][0]
         except:
             rho = model.evaluate_word_pairs(os.path.join(path_word_pairs, filename), delimiter=' ')[1][0]
-        report_dict['wordpairs'][framework].append((filename, rho))
+        eval_dict['wordpairs'][framework].append((filename, rho))
 
-    return report_dict
+    return eval_dict
 
 
 def parse_args():
@@ -282,6 +293,17 @@ def check_gpu():
         return 0
 
 
+def update_dict(d, u):
+    # merge nested dict 'u' to nested dict 'd'
+    for k, v in u.iteritems():
+        if isinstance(v, collections.Mapping):
+            r = update_dict(d.get(k, {}), v)
+            d[k] = r
+        else:
+            d[k] = u[k]
+    return d
+
+
 if __name__ == '__main__':
 
     options = parse_args()
@@ -314,32 +336,27 @@ if __name__ == '__main__':
     else:
         report_dict['frameworks'] = options.frameworks
     report_dict['platform'] = options.platform
-    report_dict['time'] = dict()
-    report_dict['memory'] = dict()
-    report_dict['command'] = dict()
-    report_dict['wordpairs'] = dict()
-    report_dict['qa'] = dict()
 
     # train and evaluate one framework at a time
     for framework in options.frameworks:
-        report_dict['wordpairs'][framework] = []
-        report_dict['qa'][framework] = []
-        report_dict = train.train_framework(framework, 0, report_dict)
+        train_dict = train.train_framework(framework, 0)
+        report_dict = update_dict(report_dict, train_dict)
         logger.info('Evaluating trained word vectors\' quality for %s...' % framework)
-        report_dict = eval_word_vectors(QA_FILE_PATH, WORD_PAIRS_DIR, framework, TRAINED_VEC_SAVE_DIR, report_dict)
+        eval_dict = eval_word_vectors(QA_FILE_PATH, WORD_PAIRS_DIR, framework, TRAINED_VEC_SAVE_DIR)
+        report_dict = update_dict(report_dict, eval_dict)
         # write report as a json string to a file
         # save after every framework to keep results in case code breaks
         with open(REPORT_FILE, 'w') as f:
             f.write(json.dumps(report_dict, indent=4))
         # train gpu implementation if gpu exists
         if GPU and framework in FRAMEWORKS_GPU:
-            report_dict['wordpairs']['{}-gpu'.format(framework)] = []
-            report_dict['qa']['{}-gpu'.format(framework)] = []
-            report_dict = train.train_framework(framework, 1, report_dict)
+            train_dict = train.train_framework(framework, 1)
+            report_dict = update_dict(report_dict, train_dict)
             logger.info('Evaluating trained word vectors\' quality for %s-gpu...' % framework)
-            report_dict = eval_word_vectors(
-                QA_FILE_PATH, WORD_PAIRS_DIR, '{}-gpu'.format(framework), TRAINED_VEC_SAVE_DIR, report_dict
+            eval_dict = eval_word_vectors(
+                QA_FILE_PATH, WORD_PAIRS_DIR, '{}-gpu'.format(framework), TRAINED_VEC_SAVE_DIR
             )
+            report_dict = update_dict(report_dict, eval_dict)
             with open(REPORT_FILE, 'w') as f:
                 f.write(json.dumps(report_dict, indent=4))
 
