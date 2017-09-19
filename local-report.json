@@ -1,268 +1,268 @@
 {
     "frameworks": [
-        "gensim", 
-        "originalc", 
         "tensorflow", 
         "dl4j", 
+        "gensim", 
+        "originalc", 
         "tensorflow-gpu"
     ], 
     "systeminfo": "CPU INFO\nModel name:Intel(R) Core(TM) i7-7700HQ CPU @ 2.80GHz, Architecture:x86_64, CPU(s):8, MemTotal:16382532 kB, \nGPU INFO\nModel Name : GeForce GTX 1060, Total FB Memory : 3011 MiB, CUDA Version : CUDA Version 8.0.61", 
     "time": {
-        "tensorflow-gpu": 6323, 
-        "tensorflow": 1584, 
-        "dl4j": 622, 
-        "gensim": 152, 
-        "originalc": 112
+        "tensorflow-gpu": 3161, 
+        "tensorflow": 728, 
+        "dl4j": 322, 
+        "gensim": 88, 
+        "originalc": 64
     }, 
     "wordpairs": {
         "tensorflow-gpu": [
             [
                 "EN-MC-30.txt", 
-                0.45510183908758062
+                0.29353512261932457
             ], 
             [
                 "EN-MEN-TR-3k.txt", 
-                0.15720353365948944
+                0.1210982602965326
             ], 
             [
                 "EN-MTurk-287.txt", 
-                0.3713067996226006
+                0.30096793186081178
             ], 
             [
                 "EN-MTurk-771.txt", 
-                0.16588186065910779
+                0.11838852150491497
             ], 
             [
                 "EN-RG-65.txt", 
-                0.22810372633838347
+                0.18391231744155379
             ], 
             [
                 "EN-RW-STANFORD.txt", 
-                -0.0029391072854402789
+                -0.033155170679996224
             ], 
             [
                 "EN-SIMLEX-999.txt", 
-                0.076966909377311224
+                0.012171056513328785
             ], 
             [
                 "EN-VERB-143.txt", 
-                0.22681093437566391
+                0.17691574655991449
             ], 
             [
                 "EN-WS-353-ALL.txt", 
-                0.28691045112688235
+                0.20170518484766048
             ], 
             [
                 "EN-WS-353-REL.txt", 
-                0.27731504417242325
+                0.18048474162137398
             ], 
             [
                 "EN-WS-353-SIM.txt", 
-                0.33281804030850037
+                0.26051731478642787
             ], 
             [
                 "EN-YP-130.txt", 
-                0.14109475620366591
+                0.16736187165485
             ]
         ], 
         "tensorflow": [
             [
                 "EN-MC-30.txt", 
-                0.4444197421310016
+                0.31378659809950538
             ], 
             [
                 "EN-MEN-TR-3k.txt", 
-                0.16052817248358836
+                0.12094394875796009
             ], 
             [
                 "EN-MTurk-287.txt", 
-                0.37568252983712619
+                0.29933855913964624
             ], 
             [
                 "EN-MTurk-771.txt", 
-                0.17302795364211315
+                0.12299250453688756
             ], 
             [
                 "EN-RG-65.txt", 
-                0.22159084807366772
+                0.19652282334336918
             ], 
             [
                 "EN-RW-STANFORD.txt", 
-                -0.0049825516178147056
+                -0.0284786243312019
             ], 
             [
                 "EN-SIMLEX-999.txt", 
-                0.077364984032278136
+                0.012022546055314264
             ], 
             [
                 "EN-VERB-143.txt", 
-                0.22515982799933462
+                0.18721454772091622
             ], 
             [
                 "EN-WS-353-ALL.txt", 
-                0.28628759121047481
+                0.21377845504288545
             ], 
             [
                 "EN-WS-353-REL.txt", 
-                0.27277346169342331
+                0.2005278086867707
             ], 
             [
                 "EN-WS-353-SIM.txt", 
-                0.33243511931264258
+                0.26723517590767404
             ], 
             [
                 "EN-YP-130.txt", 
-                0.1350227033351287
+                0.18536221633320635
             ]
         ], 
         "dl4j": [
             [
                 "EN-MC-30.txt", 
-                0.57483034247590248
+                0.50717706175090271
             ], 
             [
                 "EN-MEN-TR-3k.txt", 
-                0.63076471408092816
+                0.56205325375966775
             ], 
             [
                 "EN-MTurk-287.txt", 
-                0.6271122918339227
+                0.61630420676920084
             ], 
             [
                 "EN-MTurk-771.txt", 
-                0.55257479493703532
+                0.52306117957065523
             ], 
             [
                 "EN-RG-65.txt", 
-                0.63867732056975945
+                0.58198468225206601
             ], 
             [
                 "EN-RW-STANFORD.txt", 
-                0.34898871193556508
+                0.35425587873177916
             ], 
             [
                 "EN-SIMLEX-999.txt", 
-                0.25007100533210957
+                0.28641998790041673
             ], 
             [
                 "EN-VERB-143.txt", 
-                0.36628618470156765
+                0.32940477199084495
             ], 
             [
                 "EN-WS-353-ALL.txt", 
-                0.65425086292303325
+                0.63950827237319774
             ], 
             [
                 "EN-WS-353-REL.txt", 
-                0.63001868793630633
+                0.59691017601341068
             ], 
             [
                 "EN-WS-353-SIM.txt", 
-                0.71298651851353467
+                0.68886831966796835
             ], 
             [
                 "EN-YP-130.txt", 
-                0.39093412670175492
+                0.34002764491173554
             ]
         ], 
         "gensim": [
             [
                 "EN-MC-30.txt", 
-                0.6273506525124154
+                0.59841997325501417
             ], 
             [
                 "EN-MEN-TR-3k.txt", 
-                0.57493795217200627
+                0.57192740862354841
             ], 
             [
                 "EN-MTurk-287.txt", 
-                0.61122905128690808
+                0.62508029115898989
             ], 
             [
                 "EN-MTurk-771.txt", 
-                0.53748702121813319
+                0.53830966995845675
             ], 
             [
                 "EN-RG-65.txt", 
-                0.60679044342808075
+                0.57722022768257597
             ], 
             [
                 "EN-RW-STANFORD.txt", 
-                0.37272256627277289
+                0.37757838195248566
             ], 
             [
                 "EN-SIMLEX-999.txt", 
-                0.30381388653258024
+                0.30437701173506237
             ], 
             [
                 "EN-VERB-143.txt", 
-                0.36026296472945274
+                0.32807141812055712
             ], 
             [
                 "EN-WS-353-ALL.txt", 
-                0.67632485740762915
+                0.66920671604616322
             ], 
             [
                 "EN-WS-353-REL.txt", 
-                0.6478678014639323
+                0.63541629932938626
             ], 
             [
                 "EN-WS-353-SIM.txt", 
-                0.71710546717240009
+                0.70867829331679277
             ], 
             [
                 "EN-YP-130.txt", 
-                0.27176826022512551
+                0.29986796512639219
             ]
         ], 
         "originalc": [
             [
                 "EN-MC-30.txt", 
-                0.59241129371693846
+                0.60287084698692206
             ], 
             [
                 "EN-MEN-TR-3k.txt", 
-                0.56954388637436226
+                0.57125242457079428
             ], 
             [
                 "EN-MTurk-287.txt", 
-                0.63427734049458517
+                0.6217770130217074
             ], 
             [
                 "EN-MTurk-771.txt", 
-                0.54200327704121376
+                0.53262357728033116
             ], 
             [
                 "EN-RG-65.txt", 
-                0.54275442559043929
+                0.55219591354465813
             ], 
             [
                 "EN-RW-STANFORD.txt", 
-                0.37516647133304476
+                0.37899576498279114
             ], 
             [
                 "EN-SIMLEX-999.txt", 
-                0.30376633147034782
+                0.2957599201346397
             ], 
             [
                 "EN-VERB-143.txt", 
-                0.32267968097690436
+                0.33743506158972802
             ], 
             [
                 "EN-WS-353-ALL.txt", 
-                0.66960174437808839
+                0.67837686794533247
             ], 
             [
                 "EN-WS-353-REL.txt", 
-                0.63291575387557975
+                0.63795934267254417
             ], 
             [
                 "EN-WS-353-SIM.txt", 
-                0.7109321400908909
+                0.71383462300055811
             ], 
             [
                 "EN-YP-130.txt", 
-                0.27737576447058787
+                0.2832758977699556
             ]
         ]
     }, 
@@ -270,135 +270,135 @@
         "tensorflow-gpu": [
             [
                 "capital-common-countries", 
-                "1.97628458498"
+                "0.98814229249"
             ], 
             [
                 "capital-world", 
-                "0.757575757576"
+                "0.275482093664"
             ], 
             [
                 "currency", 
-                "0.746268656716"
+                "0.0"
             ], 
             [
                 "city-in-state", 
-                "0.763844684914"
+                "0.381922342457"
             ], 
             [
                 "family", 
-                "24.8366013072"
+                "6.53594771242"
             ], 
             [
                 "gram1-adjective-to-adverb", 
-                "1.85185185185"
+                "0.529100529101"
             ], 
             [
                 "gram2-opposite", 
-                "0.326797385621"
+                "0.980392156863"
             ], 
             [
                 "gram3-comparative", 
-                "8.09523809524"
+                "2.61904761905"
             ], 
             [
                 "gram4-superlative", 
-                "1.38339920949"
+                "0.395256916996"
             ], 
             [
                 "gram5-present-participle", 
-                "1.31048387097"
+                "0.302419354839"
             ], 
             [
                 "gram6-nationality-adjective", 
-                "6.56455142232"
+                "2.04230488694"
             ], 
             [
                 "gram7-past-tense", 
-                "1.95195195195"
+                "1.42642642643"
             ], 
             [
                 "gram8-plural", 
-                "2.52016129032"
+                "0.604838709677"
             ], 
             [
                 "gram9-plural-verbs", 
-                "1.69230769231"
+                "0.923076923077"
             ], 
             [
                 "total", 
-                "3.2605151614"
+                "1.13302901858"
             ]
         ], 
         "tensorflow": [
             [
                 "capital-common-countries", 
-                "2.17391304348"
+                "2.56916996047"
             ], 
             [
                 "capital-world", 
-                "0.964187327824"
+                "0.68870523416"
             ], 
             [
                 "currency", 
-                "0.746268656716"
+                "0.0"
             ], 
             [
                 "city-in-state", 
-                "0.8911521324"
+                "0.4455760662"
             ], 
             [
                 "family", 
-                "22.5490196078"
+                "8.49673202614"
             ], 
             [
                 "gram1-adjective-to-adverb", 
-                "1.5873015873"
+                "0.0"
             ], 
             [
                 "gram2-opposite", 
-                "1.30718954248"
+                "0.653594771242"
             ], 
             [
                 "gram3-comparative", 
-                "7.85714285714"
+                "2.53968253968"
             ], 
             [
                 "gram4-superlative", 
-                "0.98814229249"
+                "0.197628458498"
             ], 
             [
                 "gram5-present-participle", 
-                "1.71370967742"
+                "0.0"
             ], 
             [
                 "gram6-nationality-adjective", 
-                "6.78336980306"
+                "1.6776075857"
             ], 
             [
                 "gram7-past-tense", 
-                "1.8018018018"
+                "1.12612612613"
             ], 
             [
                 "gram8-plural", 
-                "2.52016129032"
+                "0.403225806452"
             ], 
             [
                 "gram9-plural-verbs", 
-                "1.69230769231"
+                "1.07692307692"
             ], 
             [
                 "total", 
-                "3.2605151614"
+                "1.14118030649"
             ]
         ], 
         "dl4j": [
             [
                 "capital-common-countries", 
-                "56.6666666667"
+                "43.3333333333"
             ], 
             [
                 "capital-world", 
-                "42.1875"
+                "28.125"
             ], 
             [
                 "currency", 
@@ -406,7 +406,7 @@
             ], 
             [
                 "city-in-state", 
-                "27.1844660194"
+                "9.70873786408"
             ], 
             [
                 "family", 
@@ -414,7 +414,7 @@
             ], 
             [
                 "gram1-adjective-to-adverb", 
-                "10.7142857143"
+                "14.2857142857"
             ], 
             [
                 "gram2-opposite", 
@@ -422,159 +422,159 @@
             ], 
             [
                 "gram3-comparative", 
-                "70.0"
+                "30.0"
             ], 
             [
                 "gram4-superlative", 
-                "16.6666666667"
+                "33.3333333333"
             ], 
             [
                 "gram5-present-participle", 
-                "23.2142857143"
+                "21.4285714286"
             ], 
             [
                 "gram6-nationality-adjective", 
-                "40.1869158879"
+                "42.0560747664"
             ], 
             [
                 "gram7-past-tense", 
-                "36.6666666667"
+                "33.3333333333"
             ], 
             [
                 "gram8-plural", 
-                "66.6666666667"
+                "8.33333333333"
             ], 
             [
                 "gram9-plural-verbs", 
-                "25.0"
+                "29.1666666667"
             ], 
             [
                 "total", 
-                "33.4890965732"
+                "25.8566978193"
             ]
         ], 
         "gensim": [
             [
                 "capital-common-countries", 
-                "47.628458498"
+                "49.209486166"
             ], 
             [
                 "capital-world", 
-                "25.9641873278"
+                "28.2369146006"
             ], 
             [
                 "currency", 
-                "17.5373134328"
+                "17.9104477612"
             ], 
             [
                 "city-in-state", 
-                "13.112667091"
+                "13.5582431572"
             ], 
             [
                 "family", 
-                "65.0326797386"
+                "58.4967320261"
             ], 
             [
                 "gram1-adjective-to-adverb", 
-                "13.8888888889"
+                "14.0211640212"
             ], 
             [
                 "gram2-opposite", 
-                "16.339869281"
+                "18.3006535948"
             ], 
             [
                 "gram3-comparative", 
-                "56.0317460317"
+                "55.2380952381"
             ], 
             [
                 "gram4-superlative", 
-                "34.5849802372"
+                "32.6086956522"
             ], 
             [
                 "gram5-present-participle", 
-                "30.9475806452"
+                "32.9637096774"
             ], 
             [
                 "gram6-nationality-adjective", 
-                "67.3231218089"
+                "67.6878191101"
             ], 
             [
                 "gram7-past-tense", 
-                "25.9009009009"
+                "25.7507507508"
             ], 
             [
                 "gram8-plural", 
-                "40.9274193548"
+                "40.4233870968"
             ], 
             [
                 "gram9-plural-verbs", 
-                "32.4615384615"
+                "32.1538461538"
             ], 
             [
                 "total", 
-                "35.0342354092"
+                "35.2950766221"
             ]
         ], 
         "originalc": [
             [
                 "capital-common-countries", 
-                "45.0592885375"
+                "50.0"
             ], 
             [
                 "capital-world", 
-                "25.8953168044"
+                "27.4104683196"
             ], 
             [
                 "currency", 
-                "19.4029850746"
+                "18.2835820896"
             ], 
             [
                 "city-in-state", 
-                "13.3036282623"
+                "13.8128580522"
             ], 
             [
                 "family", 
-                "65.0326797386"
+                "62.4183006536"
             ], 
             [
                 "gram1-adjective-to-adverb", 
-                "13.4920634921"
+                "11.1111111111"
             ], 
             [
                 "gram2-opposite", 
-                "19.2810457516"
+                "17.3202614379"
             ], 
             [
                 "gram3-comparative", 
-                "52.3015873016"
+                "55.9523809524"
             ], 
             [
                 "gram4-superlative", 
-                "33.2015810277"
+                "37.9446640316"
             ], 
             [
                 "gram5-present-participle", 
-                "30.1411290323"
+                "32.2580645161"
             ], 
             [
                 "gram6-nationality-adjective", 
-                "66.8854850474"
+                "67.4690007294"
             ], 
             [
                 "gram7-past-tense", 
-                "25.0"
+                "26.3513513514"
             ], 
             [
                 "gram8-plural", 
-                "38.810483871"
+                "39.5161290323"
             ], 
             [
                 "gram9-plural-verbs", 
-                "33.0769230769"
+                "30.7692307692"
             ], 
             [
                 "total", 
-                "34.2435604826"
+                "35.2950766221"
             ]
         ]
     }, 
@@ -582,35 +582,35 @@
     "trainingparams": {
         "sample": 0.001, 
         "platform": "local", 
-        "workers": 3, 
+        "workers": 7, 
         "negative": 5, 
-        "batch_size": 32, 
+        "batch_size": 64, 
         "epochs": 4, 
         "frameworks": [
-            "gensim", 
-            "originalc", 
             "tensorflow", 
-            "dl4j"
+            "dl4j", 
+            "gensim", 
+            "originalc"
         ], 
         "window": 5, 
-        "fname": "/benmark_nn_frameworks/data/text8-split", 
+        "fname": "/benchmark-word2vec-frameworks/data/text8-split-10000", 
         "alpha": 0.025, 
         "min_count": 5, 
         "sg": 1, 
         "size": 100
     }, 
     "command": {
-        "tensorflow-gpu": "python word2vec.py --train_data /benmark_nn_frameworks/data/text8-split --embedding_size 100 --save_path_wordvectors /benmark_nn_frameworks/trainedVectors/tensorflow-gpu.vec --epochs_to_train 4 --window_size 5 --min_count 5 --learning_rate 0.025 --num_neg_samples 5 --concurrent_steps 3 --subsample 0.001 --batch_size 32 --statistics_interval 5 --gpu 1", 
-        "tensorflow": "python word2vec.py --train_data /benmark_nn_frameworks/data/text8-split --embedding_size 100 --save_path_wordvectors /benmark_nn_frameworks/trainedVectors/tensorflow.vec --epochs_to_train 4 --window_size 5 --min_count 5 --learning_rate 0.025 --num_neg_samples 5 --concurrent_steps 3 --subsample 0.001 --batch_size 32 --statistics_interval 5", 
-        "dl4j": "java -jar dl4j-word2vec-1.0-SNAPSHOT-jar-with-dependencies.jar --input /benmark_nn_frameworks/data/text8-split --embedding_size 100 --output /benmark_nn_frameworks/trainedVectors/dl4j.vec --epochs 4 --window_size 5 --min_count 5 --learning_rate 0.025 --neg 5 --workers 3 --subsample 0.001 --batch_size 32", 
-        "gensim": "python gensim_word2vec.py --file /benmark_nn_frameworks/data/text8-split --size 100 --outputpath /benmark_nn_frameworks/trainedVectors/ --iter 4 --window 5 --min_count 5 --alpha 0.025 --negative 5 --sg 1 --workers 3 --sample 0.001", 
-        "originalc": "./word2vec -train /benmark_nn_frameworks/data/text8-split -size 100 -output /benmark_nn_frameworks/trainedVectors/originalc.vec -iter 4 -window 5 -min-count 5 -alpha 0.025 -negative 5 -cbow False -threads 3 -sample 0.001 -binary 0"
+        "tensorflow-gpu": "python word2vec.py --train_data /benchmark-word2vec-frameworks/data/text8-split-10000 --embedding_size 100 --save_path_wordvectors /benchmark-word2vec-frameworks/trainedVectors/tensorflow-gpu.vec --epochs_to_train 4 --window_size 5 --min_count 5 --learning_rate 0.025 --num_neg_samples 5 --concurrent_steps 7 --subsample 0.001 --batch_size 64 --statistics_interval 5 --gpu 1", 
+        "tensorflow": "python word2vec.py --train_data /benchmark-word2vec-frameworks/data/text8-split-10000 --embedding_size 100 --save_path_wordvectors /benchmark-word2vec-frameworks/trainedVectors/tensorflow.vec --epochs_to_train 4 --window_size 5 --min_count 5 --learning_rate 0.025 --num_neg_samples 5 --concurrent_steps 7 --subsample 0.001 --batch_size 64 --statistics_interval 5", 
+        "dl4j": "java -jar dl4j-word2vec-1.0-SNAPSHOT-jar-with-dependencies.jar --input /benchmark-word2vec-frameworks/data/text8-split-10000 --embedding_size 100 --output /benchmark-word2vec-frameworks/trainedVectors/dl4j.vec --epochs 4 --window_size 5 --min_count 5 --learning_rate 0.025 --neg 5 --workers 7 --subsample 0.001 --batch_size 64", 
+        "gensim": "python gensim_word2vec.py --file /benchmark-word2vec-frameworks/data/text8-split-10000 --size 100 --outputpath /benchmark-word2vec-frameworks/trainedVectors/ --iter 4 --window 5 --min_count 5 --alpha 0.025 --negative 5 --sg 1 --workers 7 --sample 0.001", 
+        "originalc": "./word2vec -train /benchmark-word2vec-frameworks/data/text8-split-10000 -size 100 -output /benchmark-word2vec-frameworks/trainedVectors/originalc.vec -iter 4 -window 5 -min-count 5 -alpha 0.025 -negative 5 -cbow False -threads 7 -sample 0.001 -binary 0"
     }, 
     "memory": {
-        "tensorflow-gpu": 912, 
-        "tensorflow": 851, 
-        "dl4j": 2227, 
-        "gensim": 173, 
-        "originalc": 576
+        "tensorflow-gpu": 893, 
+        "tensorflow": 850, 
+        "dl4j": 2812, 
+        "gensim": 175, 
+        "originalc": 578
     }
 }
