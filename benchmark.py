@@ -309,10 +309,10 @@ if __name__ == '__main__':
     options = parse_args()
     report_dict = dict()
 
-    TRAINED_VEC_SAVE_DIR = 'trainedVectors/'
+    TRAINED_VEC_SAVE_DIR = 'persistent/results/'
     QA_FILE_PATH = 'data/questions-words.txt'
     WORD_PAIRS_DIR = 'data/word-sim/'
-    REPORT_FILE = "{}-report.json".format(options.platform)
+    REPORT_FILE = "{}{}-report.json".format(TRAINED_VEC_SAVE_DIR, options.platform)
 
     GPU = check_gpu()  # indicates if gpu capability exists
     FRAMEWORKS_GPU = ['tensorflow']
