@@ -105,19 +105,6 @@ public class Word2vec {
         double subsample_ = Double.parseDouble(cmd.getOptionValue("subsample"));
         double learning_rate_ = Double.parseDouble(cmd.getOptionValue("learning_rate"));
 
-        System.out.println(inputFilePath);
-        System.out.println(outputFilePath);
-        System.out.println(epoch_);
-        System.out.println(embedding_size_);
-        System.out.println(neg_);
-        System.out.println(batch_size_);
-        System.out.println(window_size_);
-        System.out.println(min_count_);
-        System.out.println(workers_);
-        System.out.println(subsample_);
-        System.out.println(learning_rate_);
-
-
         log.info("Load & Vectorize Sentences....");
         // Strip white space before and after for each line
         SentenceIterator iter = new BasicLineIterator(inputFilePath);
@@ -146,7 +133,6 @@ public class Word2vec {
 
         log.info("Writing word vectors to text file....");
         VocabCache vocabulary = vec.vocab();
-        
 
         try (OutputStream outVectorPath = new FileOutputStream(outputFilePath, true)) {
 
