@@ -7,6 +7,8 @@ import org.deeplearning4j.text.sentenceiterator.SentenceIterator;
 import org.deeplearning4j.text.tokenization.tokenizer.preprocessor.CommonPreprocessor;
 import org.deeplearning4j.text.tokenization.tokenizerfactory.DefaultTokenizerFactory;
 import org.deeplearning4j.text.tokenization.tokenizerfactory.TokenizerFactory;
+import org.deeplearning4j.models.word2vec.wordstore.VocabCache;
+import org.nd4j.linalg.api.ndarray.INDArray;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -103,6 +105,19 @@ public class Word2vec {
         double subsample_ = Double.parseDouble(cmd.getOptionValue("subsample"));
         double learning_rate_ = Double.parseDouble(cmd.getOptionValue("learning_rate"));
 
+        System.out.println(inputFilePath);
+        System.out.println(outputFilePath);
+        System.out.println(epoch_);
+        System.out.println(embedding_size_);
+        System.out.println(neg_);
+        System.out.println(batch_size_);
+        System.out.println(window_size_);
+        System.out.println(min_count_);
+        System.out.println(workers_);
+        System.out.println(subsample_);
+        System.out.println(learning_rate_);
+
+
         log.info("Load & Vectorize Sentences....");
         // Strip white space before and after for each line
         SentenceIterator iter = new BasicLineIterator(inputFilePath);
@@ -130,20 +145,48 @@ public class Word2vec {
         vec.fit();
 
         log.info("Writing word vectors to text file....");
-        System.out.println(vec.vocab(). numWords());
+        VocabCache vocabulary = vec.vocab();
+        
 
         try (OutputStream outVectorPath = new FileOutputStream(outputFilePath, true)) {
 
-            String firstLine = Integer.toString(vec.vocab(). numWords()) + " " + Integer.toString(embedding_size_) + "\n";
+            String firstLine = Integer.toString(vocabulary.numWords()) + " " + Integer.toString(embedding_size_) + "\n";
             byte[] bytes = firstLine.getBytes();
             // write a byte sequence
             outVectorPath.write(bytes);
 
-            WordVectorSerializer.writeWordVectors(vec, outVectorPath);
+            // Write word vectors
+
+            for(int i = 0; i < vocabulary.numWords(); i++)
+            {
+                String word = vocabulary.wordAtIndex(i);
+                if (word == null) {
+                    continue;
+                }
+                StringBuilder sb = new StringBuilder();
+                sb.append(word);
+                sb.append(" ");
+                INDArray wordVector = vec.getWordVectorMatrix(word);
+                for (int j = 0; j < wordVector.length(); j++) {
+                    sb.append(wordVector.getFloat(j));
+                    if (j < wordVector.length() - 1) {
+                        sb.append(" ");
+                    }
+                }
+                sb.append("\n");
+                outVectorPath.write(sb.toString().getBytes());
+            }
+                
+
+            try {
+                outVectorPath.flush();
+                outVectorPath.close();
+            } catch (Exception e) {
+            }
 
         } catch (IOException e) {
             e.printStackTrace();
         }
 
-    }
+    }    
 }
