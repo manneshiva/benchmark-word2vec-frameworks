@@ -15,10 +15,6 @@ import logging
 import collections
 
 
-logging.basicConfig(format='%(asctime)s : %(levelname)s : %(message)s', level=logging.INFO)
-logger = logging.getLogger(__name__)
-
-
 class Train(object):
     """
     Class to train various word2vec on various ML frameworks.
@@ -54,53 +50,59 @@ class Train(object):
         if framework == 'gensim':
             cwd = '{}{}'.format(os.getcwd(), '/nn_frameworks/gensim')
             cmd_str = \
-                'python gensim_word2vec.py --file {} --size {} --outputpath {}' \
-                ' --iter {} --window {} --min_count {} --alpha {} --negative {}' \
-                ' --sg {} --workers {} --sample {}' \
+                'python gensim_word2vec.py --file {fname} --size {size} --outputpath {outputpath}' \
+                ' --iter {epochs} --window {window} --min_count {min_count} --alpha {alpha} --negative {neg}' \
+                ' --sg {sg} --workers {workers} --sample {sample}' \
                 .format(
-                    self.fname, self.size, self.outputpath, self.epochs,
-                    self.window, self.min_count, self.alpha, self.negative,
-                    self.sg, self.workers, self.sample
+                    fname=self.fname, size=self.size, outputpath=self.outputpath,
+                    epochs=self.epochs, window=self.window,
+                    min_count=self.min_count, alpha=self.alpha, neg=self.negative,
+                    sg=self.sg, workers=self.workers, sample=self.sample
                 )
 
         elif framework == 'originalc':
             cwd = '{}{}'.format(os.getcwd(), '/nn_frameworks/originalc')
             # run executable
             cmd_str = \
-                './word2vec -train {} -size {} -output {} -iter {}' \
-                ' -window {} -min-count {} -alpha {} -negative {} -cbow {} -threads' \
-                ' {} -sample {} -binary 0' \
+                './word2vec -train {fname} -size {size} -output {outputpath} -iter {epochs}' \
+                ' -window {window} -min-count {min_count} -alpha {alpha} -negative {neg} -cbow {sg} -threads' \
+                ' {workers} -sample {sample} -binary 0' \
                 .format(
-                    self.fname, self.size, self.outputpath + 'originalc.vec',
-                    self.epochs, self.window, self.min_count, self.alpha,
-                    self.negative, not self.sg, self.workers, self.sample
+                    fname=self.fname, size=self.size, outputpath=self.outputpath + 'originalc.vec',
+                    epochs=self.epochs, window=self.window, min_count=self.min_count,
+                    alpha=self.alpha, neg=self.negative, sg=not self.sg,
+                    workers=self.workers, sample=self.sample
                 )
 
         elif framework == 'tensorflow':
             cwd = '{}{}'.format(os.getcwd(), '/nn_frameworks/tensorflow')
             if gpu:
                 cmd_str = \
-                    'python word2vec.py --train_data {}' \
-                    ' --embedding_size {} --save_path_wordvectors {}' \
-                    ' --epochs_to_train {} --window_size {} --min_count {}' \
-                    ' --learning_rate {} --num_neg_samples {} --concurrent_steps {}' \
-                    ' --subsample {} --batch_size {} --statistics_interval 5 --gpu 1' \
+                    'python word2vec.py --train_data {fname}' \
+                    ' --embedding_size {size} --save_path_wordvectors {outputpath}' \
+                    ' --epochs_to_train {epochs} --window_size {window} --min_count {min_count}' \
+                    ' --learning_rate {alpha} --num_neg_samples {neg} --concurrent_steps {workers}' \
+                    ' --subsample {sample} --batch_size {batch_size} --statistics_interval 5 --gpu 1' \
                     .format(
-                        self.fname, self.size, self.outputpath + 'tensorflow-gpu.vec',
-                        self.epochs, self.window, self.min_count, self.alpha,
-                        self.negative, self.workers, self.sample, self.batch_size
+                        fname=self.fname, size=self.size, outputpath=self.outputpath + 'tensorflow-gpu.vec',
+                        epochs=self.epochs, window=self.window,
+                        min_count=self.min_count, alpha=self.alpha,
+                        neg=self.negative, workers=self.workers,
+                        sample=self.sample, batch_size=self.batch_size
                     )
             else:
                 cmd_str = \
-                    'python word2vec.py --train_data {}' \
-                    ' --embedding_size {} --save_path_wordvectors {}' \
-                    ' --epochs_to_train {} --window_size {} --min_count {}' \
-                    ' --learning_rate {} --num_neg_samples {} --concurrent_steps {}' \
-                    ' --subsample {} --batch_size {} --statistics_interval 5' \
+                    'python word2vec.py --train_data {fname}' \
+                    ' --embedding_size {size} --save_path_wordvectors {outputpath}' \
+                    ' --epochs_to_train {epochs} --window_size {window} --min_count {min_count}' \
+                    ' --learning_rate {alpha} --num_neg_samples {neg} --concurrent_steps {workers}' \
+                    ' --subsample {sample} --batch_size {batch_size} --statistics_interval 5' \
                     .format(
-                        self.fname, self.size, self.outputpath + 'tensorflow.vec',
-                        self.epochs, self.window, self.min_count, self.alpha,
-                        self.negative, self.workers, self.sample, self.batch_size
+                        fname=self.fname, size=self.size, outputpath=self.outputpath + 'tensorflow.vec',
+                        epochs=self.epochs, window=self.window,
+                        min_count=self.min_count, alpha=self.alpha,
+                        neg=self.negative, workers=self.workers,
+                        sample=self.sample, batch_size=self.batch_size
                     )
 
         elif framework == 'dl4j':
@@ -108,13 +110,15 @@ class Train(object):
             cwd = './nn_frameworks/dl4j/target'
             cmd_str = \
                 'java -jar dl4j-word2vec-1.0-SNAPSHOT-jar-with-dependencies.jar' \
-                ' --input {} --embedding_size {} --output {} --epochs {}' \
-                ' --window_size {} --min_count {} --learning_rate {} --neg {}' \
-                ' --workers {} --subsample {} --batch_size {}' \
+                ' --input {fname} --embedding_size {size} --output {outputpath} --epochs {epochs}' \
+                ' --window_size {window} --min_count {min_count} --learning_rate {alpha} --neg {neg}' \
+                ' --workers {workers} --subsample {sample} --batch_size {batch_size}' \
                 .format(
-                    self.fname, self.size, self.outputpath + 'dl4j.vec',
-                    self.epochs, self.window, self.min_count, self.alpha,
-                    self.negative, self.workers, self.sample, self.batch_size
+                    fname=self.fname, size=self.size, outputpath=self.outputpath + 'dl4j.vec',
+                    epochs=self.epochs, window=self.window,
+                    min_count=self.min_count, alpha=self.alpha,
+                    neg=self.negative, workers=self.workers, sample=self.sample,
+                    batch_size=self.batch_size
                 )
 
         logger.info('running command : %s' % cmd_str)
@@ -305,6 +309,24 @@ def update_dict(d, u):
 
 
 if __name__ == '__main__':
+
+    logger = logging.getLogger(__name__)
+    logger.setLevel(logging.DEBUG)
+    # add console handler at INFO level
+    handler = logging.StreamHandler()
+    handler.setLevel(logging.INFO)
+    formatter = logging.Formatter('%(asctime)s : %(levelname)s : %(message)s')
+    handler.setFormatter(formatter)
+    logger.addHandler(handler)
+    # add file handler at DEBUG level
+    handler = logging.FileHandler(os.path.join(os.getcwd(), 'benchmark.log'), 'w')
+    handler.setLevel(logging.DEBUG)
+    formatter = logging.Formatter('%(asctime)s : %(levelname)s : %(message)s')
+    handler.setFormatter(formatter)
+    logger.addHandler(handler)
+    # disable overwhelming logs from eval_word_vectors function
+    eval_logger = logging.getLogger('{0}.{1}'.format(__name__, 'eval_word_vectors'))
+    eval_logger.setLevel(logging.ERROR)
 
     options = parse_args()
     report_dict = dict()

@@ -6,7 +6,21 @@
 import gensim
 import logging
 import argparse
-logging.basicConfig(format='%(asctime)s : %(levelname)s : %(message)s', level=logging.INFO)
+import os
+logger = logging.getLogger()
+logger.setLevel(logging.DEBUG)
+# add console handler at INFO level
+handler = logging.StreamHandler()
+handler.setLevel(logging.INFO)
+formatter = logging.Formatter('%(asctime)s : %(levelname)s : %(message)s')
+handler.setFormatter(formatter)
+logger.addHandler(handler)
+# add file handler at DEBUG level
+handler = logging.FileHandler(os.path.join(os.getcwd(), 'gensim.log'), 'w')
+handler.setLevel(logging.DEBUG)
+formatter = logging.Formatter('%(asctime)s : %(levelname)s : %(message)s')
+handler.setFormatter(formatter)
+logger.addHandler(handler)
 
 
 def parse_args():
