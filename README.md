@@ -1,4 +1,4 @@
-# benchmark-word2vec-frameworks [WIP]
+# benchmark-word2vec-frameworks
 A repository for benchmarking popular Neural Networks frameworks used to learn unsupervised word embeddings, on different hardware platforms.
 This repository is a result of [this](https://github.com/RaRe-Technologies/gensim/issues/1418) issue raised on the [Gensim repo](https://github.com/RaRe-Technologies/gensim) which achieves the following objectives:
 - Compare [word2vec](https://arxiv.org/pdf/1301.3781.pdf) implementations of popular neural network frameworks by reporting metrics like time to train, peak memory, word vectors quality etc.
@@ -19,36 +19,41 @@ DL4J | Deeplearning4j is a commercial-grade, open-source, distributed deep-learn
  
  ### Docker
  For the purpose of reproducibilty, the benchmarks need to be run inside a [docker](https://docs.docker.com/).
- - Build your own docker using the `Docker` file provided in the repo. This step assumes you have [installed docker](https://docs.docker.com/engine/installation/linux/ubuntu/#install-using-the-repository). Run the following command inside the repo directory.
+ - Build your own docker using the `Docker` file provided in the repo. This step assumes you have [installed docker](https://docs.docker.com/engine/installation/linux/ubuntu/#install-using-the-repository). Run the following command from the directory containing the this repository.
  
- `sudo docker build -f Dockerfile-cpu -t benchmarkword2vec-cpu .`
+ `docker build -f Dockerfile-cpu-tfsource -t manneshiva/playground:benchmarkword2vec-cpu-tfsource .`
  
  - Download the pre-built docker image from Docker's public [registry](https://cloud.docker.com/).
  
- `sudo docker pull manneshiva/playground:benchmarkword2vec-gpu`
+ `docker pull manneshiva/playground:benchmarkword2vec-cpu-tfsource`
  
  [Images on Docker Hub](https://hub.docker.com/r/manneshiva/playground/tags/)
 
  ##### GPU benchmarks
- Exploiting GPU to train word vectors inside docker requires `nvidia-docker`. Requirements, installation guide and why it is necessary can be found [here](https://github.com/NVIDIA/nvidia-docker). Follow the same steps mentioned above replacing `docker` with `nvidia-docker` and `benchmarkword2vec-cpu` with `benchmarkword2vec-gpu`.
+ Exploiting GPU to train word vectors inside docker requires `nvidia-docker`. Requirements, installation guide and why it is necessary can be found [here](https://github.com/NVIDIA/nvidia-docker). Follow the same steps mentioned above replacing `docker` with `nvidia-docker` and `benchmarkword2vec-cpu-tfsource` with `benchmarkword2vec-gpu-tfsource`.
  
- ```sudo nvidia-docker build -f Dockerfile-gpu -t benchmarkword2vec-gpu .```
+ ```docker build -f Dockerfile-gpu-tfsource -t manneshiva/playground:benchmarkword2vec-gpu-tfsource .```
 
-##### Compile tensorflow from source
-Use the `benchmarkword2vec-{c/g}pu-tfsource` Dockerfile to benefit from sse4.2/avx/fma optimizations which results in a faster training time for tensorflow. This may not work on all machines.
+**P.S.:** In order to benefit from sse4.2/avx/fma optimizations (which results in a faster training time for tensorflow), tensorflow has been built from source. In case your machine doesn't support this, use `benchmarkword2vec-{c/g}pu`.
+
  
 **Run the docker image**:
 
-`docker run -v absPathTo/benchmark-word2vec-frameworks/:/benchmark-word2vec-frameworks/ -w /benchmark-word2vec-frameworks/ --rm -it -p 8888:8888 manneshiva/playground:benchmarkword2vec-cpu`
+`docker run -v absPathTo/persistent/:/benchmark-word2vec-frameworks/persistent/ -w /benchmark-word2vec-frameworks/ --rm -it -p 8888:8888 manneshiva/playground:benchmarkword2vec-cpu-tfsource /bin/bash`
  
  
  
- `nvidia-docker run -v absPathTo/benchmark-word2vec-frameworks/:/benchmark-word2vec-frameworks/ -w /benchmark-word2vec-frameworks/ --rm -it -p 8888:8888 manneshiva/playground:benchmarkword2vec-gpu`
+ `nvidia-docker run -v absPathTo/persistent/:/benchmark-word2vec-frameworks/persistent/ -w /benchmark-word2vec-frameworks/ --rm -it -p 8888:8888 manneshiva/playground:benchmarkword2vec-gpu /bin/bash`
 
  ### Run
  To run all the benchmarks, eg:
  
- `python benchmark.py --file data/text8 --frameworks tensorflow gensim originalc --epochs 5 --size 100 --workers 4`
+ ```
+ python benchmark.py --fname /benchmark-word2vec-frameworks/persistent/enwiki-20170501-2M.cor \
+--frameworks tensorflow originalc dl4j gensim --epochs 4 --size 100 --window 5 --min_count 30 \
+--negative 5 --workers 4 --sample 0.001 --sg 1 --batch_size 64 --alpha 0.025 --platform aws \
+|& tee persistent/benchmark.log
+ ```
  
  *usage help* : `python benchmark.py -h`
  
@@ -58,17 +63,18 @@ Parameter | Description
 -------- | ---
  --frameworks | Specify frameworks to run the benchmarks on(demilited by space). If None provided, benchmarks will be run on all supported frameworks.
  --file | Path to text corpus
- --epochs | Number of iterations (epochs) over the corpus. Default : 5
- --size | Dimensionality of the embeddings/feature vectors. Default : 100
- --window | Maximum distance between the current and predicted word within a sentence. Default : 5
- --min_count |  This will discard words that appear less than MIN_COUNT times. Default : 5
- --workers |  Use these many worker threads to train the model. default : 5
- --sample | Set threshold for occurrence of words. Those that appear with higher frequency in the training data will be randomly down-sampled; default is 1e-3, useful range is (0, 1e-5)
+ --epochs | Number of iterations (epochs) over the corpus.
+ --size | Dimensionality of the embeddings/feature vectors.
+ --window | Maximum distance between the current and predicted word within a sentence.
+ --min_count |  This will discard words that appear less than MIN_COUNT times.
+ --workers |  Use these many worker threads to train the model.
+ --sample | Set threshold for occurrence of words. Those that appear with higher frequency in the training data will be randomly down-sampled; useful range is (0, 1e-5)
 --sg | Use the skip-gram model; default is 1 (use 0 for continuous bag of words model)
---negative | Number of negative examples; default is 5, common values are 3 - 10 (0 = not used)
---alpha | The initial learning rate. Default : 0.025
+--negative | Number of negative examples; common values are 3 - 10 (0 = not used)
+--alpha | The initial learning rate. eg. 0.025
 
-On completion, the report can be found in `platform-report.json` file.
+On completion, the report, trained vectors and logs file can be found in `persistent/`.
+
 
 
 ### Jupyter Notebook
@@ -77,4 +83,8 @@ To generate graphics from the report,fire up the notebook, go to localhost:8888 
 ```jupyter notebook --allow-root ```
 
   ## Running benchmark on cloud
-  [TODO]
+ Modify the `hosts` file in the `ansible/` folder and run the following command:
+ 
+ `ansible-playbook -i hosts benchmark.yml -v`
+
+This will install Docker, pull the Docker image and download the preprocessed wiki corpus(can be in this repository's [release](https://github.com/manneshiva/benchmark-word2vec-frameworks/releases)) without manual intervention. Once this command is complete, start the docker and run benchmark.
