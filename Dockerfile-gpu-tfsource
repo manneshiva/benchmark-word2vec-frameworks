@@ -131,5 +131,8 @@ RUN TF_INC=/usr/local/lib/python2.7/dist-packages/tensorflow/include && \
 WORKDIR /benchmark-word2vec-frameworks/nn_frameworks/dl4j
 RUN mvn package
 
+# set python hash seed
+ENV PYTHONHASHSEED 12345
+
 WORKDIR /
 CMD ["/bin/bash"]
