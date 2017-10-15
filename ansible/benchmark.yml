@@ -1,5 +1,5 @@
 ---
-# Run this playbook using : `ansible-playbook -i hosts benchmark.yml -vvvv` from inside the ansible directory in repo
+# Run this playbook using : `ansible-playbook -i hosts benchmark.yml -v` from inside the ansible directory in repo
 - name: Fetch and install packages/tools to run Docker 
   hosts: all
   gather_facts: False
@@ -37,7 +37,7 @@
     with_items:
           - apt-transport-https=1.2.24
           - apt-transport-https=1.2.24
-          - curl=7.47.0-1ubuntu2.2
+          - curl=7.47.0-1ubuntu2.3
           - software-properties-common=0.96.20.7
 
   - name: Add Docker’s official GPG key
@@ -68,6 +68,16 @@
     become: true
     pip:
         name: docker-py
+
+  - name:  Install packages - htop, tmux, less, vim
+    become: true
+    apt: 
+        name: "{{item}}"
+    with_items:
+          - htop
+          - tmux
+          - less
+          - vim
   
   tasks:
   # Clone github repo, pull image from docker, create wiki corpus, run benchmark in docker and finally mail the report
@@ -81,56 +91,65 @@
   - name: Pull docker image from Docker Hub
     become: true
     docker_image:
-      name: manneshiva/playground:benchmarkword2vec-cpu
+      name: manneshiva/playground:benchmarkword2vec-cpu-tfsource
 
-  - name: Download wiki dump
+  - name: Make persistent directory - for docker
+    become: true
+    file: path=/persistent/ state=directory
+
+  - name: Download wiki dump part 1
+    become: true
     get_url:
-      url: https://dumps.wikimedia.org/enwiki/20170801/enwiki-20170801-pages-articles-multistream.xml.bz2
-      dest: /home/ubuntu/benchmark-word2vec-frameworks/data/
+      url: https://github.com/manneshiva/benchmark-word2vec-frameworks/releases/download/v0.1.0/enwiki-20170501-2M-1.cor.bz2
+      dest: /persistent/
 
-  - name: Process wiki dump to create corpus
+  - name: Download wiki dump part 2
+    become: true
+    get_url:
+      url: https://github.com/manneshiva/benchmark-word2vec-frameworks/releases/download/v0.1.0/enwiki-20170501-2M-2.cor.bz2
+      dest: /persistent/
+
+  - name: Unzip wiki files
     become: true
     command: >
-      python wiki2corpus.py --wikifile ./data/enwiki-20170801-pages-articles-multistream.xml.bz2 
-      --corpusfile ./data/enwiki.cor --words_per_line 1000 arg1
+      bunzip2 enwiki-20170501-2M-1.cor.bz2 && 
+      bunzip2 enwiki-20170501-2M-2.cor.bz2 arg1
     args:
-      chdir: /home/ubuntu/benchmark-word2vec-frameworks/
+      chdir: /persistent/
 
-  - name: Run benchamrk inside Docker
+  - name: Combine wiki files
     become: true
-    command: >
-      sudo docker run --rm -w /benchmark-word2vec-frameworks/ 
-      -v /home/ubuntu/benchmark-word2vec-frameworks:/benchmark-word2vec-frameworks/ 
-      manneshiva/playground:benchmarkword2vec-cpu 
-      python benchmark.py --platform aws --frameworks gensim originalc tensorflow dl4j --file data/enwiki.cor --epochs 4 --batch_size 16 --workers 7 --size 100
-
-  # Mailing benchmark report using yahoomail SMTP servers
-  - name: Install sendemail
-    become: true
-    apt:
-        name: sendemail
-        update_cache: yes 
-        cache_valid_time: 600
-
-  # install libnet-ssleay-perl & libio-socket-ssl-perl for TLS support
-  - name: Install libnet-ssleay-perl
-    become: true
-    apt:
-        name: libnet-ssleay-perl
-        update_cache: yes 
-        cache_valid_time: 600
-  - name: Install libio-socket-ssl-perl
-    become: true
-    apt:
-        name: libio-socket-ssl-perl
-        update_cache: yes 
-        cache_valid_time: 600
-
-  # email the benchmark report
-  - name: Mail Benchamrk Report
-    command: >
-      sendemail -f "shiva.manne@yahoo.com" -t "shiva.manne@yahoo.com" -u "Word2Vec Benchmark Report - {{inventory_hostname}}" 
-      -m "Benchmark report attached within this mail." -xu "shiva.manne@yahoo.com" -xp "Benchmark@gensim" -o tls=yes 
-      -s "smtp.mail.yahoo.com:587" -a ./aws-report.json
+    shell: cat enwiki-20170501-2M-1.cor enwiki-20170501-2M-2.cor > enwiki-20170501-2M.cor
     args:
-      chdir: /home/ubuntu/benchmark-word2vec-frameworks/
+      chdir: /persistent/
+
+  # # Mailing benchmark report using yahoomail SMTP servers
+  # - name: Install sendemail
+  #   become: true
+  #   apt:
+  #       name: sendemail
+  #       update_cache: yes 
+  #       cache_valid_time: 600
+
+  # # install libnet-ssleay-perl & libio-socket-ssl-perl for TLS support
+  # - name: Install libnet-ssleay-perl
+  #   become: true
+  #   apt:
+  #       name: libnet-ssleay-perl
+  #       update_cache: yes 
+  #       cache_valid_time: 600
+  # - name: Install libio-socket-ssl-perl
+  #   become: true
+  #   apt:
+  #       name: libio-socket-ssl-perl
+  #       update_cache: yes 
+  #       cache_valid_time: 600
+
+  # # email the benchmark report
+  # - name: Mail Benchamrk Report
+  #   command: >
+  #     sendemail -f "shiva.manne@yahoo.com" -t "shiva.manne@yahoo.com" -u "Word2Vec Benchmark Report - {{inventory_hostname}}" 
+  #     -m "Benchmark report attached within this mail." -xu "shiva.manne@yahoo.com" -xp "Benchmark@gensim" -o tls=yes 
+  #     -s "smtp.mail.yahoo.com:587" -a ./*-report.json
+  #   args:
+  #     chdir: /benchmark-word2vec-frameworks/persistent/
